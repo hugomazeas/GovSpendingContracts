@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Large data files and backups
+/data/*.csv
+/data/
+/backups/
+/identifier.sqlite
+/database/database.sqlite
+*.sqlite
+*.db
+*:Zone.Identifier
