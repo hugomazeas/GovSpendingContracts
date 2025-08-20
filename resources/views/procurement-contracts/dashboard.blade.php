@@ -60,37 +60,39 @@
 
     <!-- Organization Spending Distribution Pie Chart -->
     <div class="card mb-16">
-        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
-            <i class="fas fa-chart-pie text-3xl text-purple-600 mr-3"></i>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                <span class="pie-chart-year-label">2025</span> Year Statistics
-            </h3>            <div class="ml-auto text-sm text-gray-600">
+        <div class="flex flex-col sm:flex-row sm:items-center mb-6 pb-4 border-b border-gray-200">
+            <div class="flex items-center mb-4 sm:mb-0">
+                <i class="fas fa-chart-pie text-2xl sm:text-3xl text-purple-600 mr-3"></i>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
+                    <span class="pie-chart-year-label">2025</span> Year Statistics
+                </h3>
+            </div>
+            <div class="sm:ml-auto text-sm text-gray-600">
                 <i class="fas fa-info-circle mr-1"></i>
                 <span class="pie-chart-year-label">2025</span> spending breakdown
             </div>
         </div>
-        <div class="flex justify-evenly">
-            <div class="relative" style="height: 400px;">
-                <canvas id="organizations-pie-chart" class="w-full h-full"></canvas>
-                <!-- Loading state -->
-                <div id="pie-chart-loading"
-                     class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
-                        <p class="text-sm text-gray-600">Loading spending distribution...</p>
+        <div class="flex flex-col lg:flex-row lg:justify-evenly gap-6">
+            <div class="flex-1 max-w-full lg:max-w-md">
+                <div class="relative h-64 sm:h-80 lg:h-96">
+                    <canvas id="organizations-pie-chart" class="w-full h-full"></canvas>
+                    <!-- Loading state -->
+                    <div id="pie-chart-loading"
+                         class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                            <p class="text-xs sm:text-sm text-gray-600">Loading spending distribution...</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Statistics Grid -->
-            <div class="stats-grid-container">
+            <div class="flex-1 stats-grid-container">
                 <x-stats-grid :stats="$stats"/>
             </div>
         </div>
     </div>
-
-
-
 
     <!-- Vendor Leaderboards - First Row (Lazy Loaded) -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8" id="vendor-leaderboards">
