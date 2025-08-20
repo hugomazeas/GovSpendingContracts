@@ -18,7 +18,7 @@ return new class extends Migration
             $table->index('vendor_name');
             $table->index('total_contract_value');
             $table->index('contract_date');
-            
+
             // Composite indexes for common query combinations
             $table->index(['contract_year', 'organization']);
             $table->index(['contract_year', 'vendor_name']);

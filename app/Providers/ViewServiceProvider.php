@@ -30,7 +30,7 @@ class ViewServiceProvider extends ServiceProvider
                     ->pluck('contract_year')
                     ->toArray();
             });
-            
+
             $view->with('availableYears', $availableYears);
         });
     }
