@@ -1,11 +1,37 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-br from-primary-500 to-secondary-500 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+  }
+  
+  .card {
+    @apply bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .stats-card {
+    @apply bg-white rounded-2xl p-6 text-center shadow-xl transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .vendor-item {
+    @apply flex items-center justify-between p-4 mb-3 bg-gray-50 rounded-xl transition-all duration-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 hover:translate-x-2 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  
+  .clickable-organization {
+    @apply cursor-pointer relative;
+  }
+  
+  .vendor-item-link {
+    @apply text-inherit no-underline block;
+  }
+  
+  .vendor-item-link:hover {
+    @apply text-inherit no-underline;
+  }
 }
