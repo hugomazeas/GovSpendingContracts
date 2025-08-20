@@ -1,14 +1,7 @@
 @props(['stats'])
 
-<!-- Year-specific Stats Header -->
-<div class="text-center mb-6">
-    <h3 class="text-2xl font-bold text-gray-800 mb-2">
-        {{ $stats['year'] ?? 'Current' }} Year Statistics
-    </h3>
-    <p class="text-gray-600">Government procurement data for fiscal year {{ $stats['year'] ?? date('Y') }}</p>
-</div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
     <!-- Total Contracts -->
     <div class="stats-card">
         <div class="text-4xl text-blue-500 mb-4">
@@ -21,7 +14,7 @@
             Total Contracts
         </div>
     </div>
-    
+
     <!-- Total Value -->
     <div class="stats-card">
         <div class="text-4xl text-green-500 mb-4">
@@ -34,7 +27,7 @@
             Total Value
         </div>
     </div>
-    
+
     <!-- Unique Vendors -->
     <div class="stats-card">
         <div class="text-4xl text-indigo-500 mb-4">
@@ -47,7 +40,7 @@
             Unique Vendors
         </div>
     </div>
-    
+
     <!-- Average Contract Value -->
     <div class="stats-card">
         <div class="text-4xl text-amber-500 mb-4">

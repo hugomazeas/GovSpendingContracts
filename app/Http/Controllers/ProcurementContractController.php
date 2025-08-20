@@ -4,30 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\ProcurementContract;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProcurementContractController extends Controller
 {
     public function index(Request $request): \Illuminate\Contracts\View\View
     {
-        $selectedYear = $request->get('year', date('Y'));
-        $availableYears = $this->getAvailableYears();
+        $availableYears = Cache::remember('available_years', 3600, function () {
+            return $this->getAvailableYears();
+        });
 
-        // Ensure selected year is valid
-        if (!in_array($selectedYear, $availableYears->toArray())) {
-            $selectedYear = $availableYears->first() ?? date('Y');
-        }
-
-        $stats = $this->getStatistics($selectedYear);
-        $topVendorsByCount = $this->getTopVendorsByCount($selectedYear);
-        $topVendorsByValue = $this->getTopVendorsByValue($selectedYear);
-        $topOrganizationsBySpending = $this->getTopOrganizationsBySpending($selectedYear);
+        // Default year for initial stats loading (will be overridden by frontend)
+        $defaultYear = $availableYears->first() ?? date('Y');
+        $stats = Cache::remember("dashboard_stats_{$defaultYear}", 300, function () use ($defaultYear) {
+            return $this->getStatistics($defaultYear);
+        });
 
         return view('procurement-contracts.dashboard', compact(
             'stats',
-            'topVendorsByCount',
-            'topVendorsByValue',
-            'topOrganizationsBySpending',
-            'selectedYear',
             'availableYears'
         ));
     }
@@ -102,18 +96,22 @@ class ProcurementContractController extends Controller
 
     private function getStatistics(int $year): array
     {
-        $query = ProcurementContract::where('contract_year', $year);
-
-        $totalContracts = $query->count();
-        $totalValue = $query->sum('total_contract_value');
-        $uniqueVendors = $query->distinct('vendor_name')->count();
-        $avgContractValue = $query->avg('total_contract_value');
+        // Single optimized query to get all statistics at once
+        $stats = ProcurementContract::where('contract_year', $year)
+            ->selectRaw('
+                COUNT(*) as total_contracts,
+                SUM(total_contract_value) as total_value,
+                AVG(total_contract_value) as avg_contract_value,
+                COUNT(DISTINCT vendor_name) as unique_vendors
+            ')
+            ->whereNotNull('total_contract_value')
+            ->first();
 
         return [
-            'total_contracts' => $totalContracts,
-            'total_value' => $totalValue,
-            'unique_vendors' => $uniqueVendors,
-            'avg_contract_value' => $avgContractValue,
+            'total_contracts' => $stats->total_contracts ?? 0,
+            'total_value' => $stats->total_value ?? 0,
+            'unique_vendors' => $stats->unique_vendors ?? 0,
+            'avg_contract_value' => $stats->avg_contract_value ?? 0,
             'year' => $year,
         ];
     }
@@ -153,42 +151,65 @@ class ProcurementContractController extends Controller
             ->get();
     }
 
-    public function organizationDetail(string $organization): \Illuminate\Contracts\View\View
+    public function organizationDetail(Request $request, string $organization): \Illuminate\Contracts\View\View
     {
         $decodedOrganization = urldecode($organization);
 
-        $contractsByYear = $this->getContractsByYearForOrganization($decodedOrganization);
-        $organizationStats = $this->getOrganizationStats($decodedOrganization);
-        $topVendorsForOrg = $this->getTopVendorsForOrganization($decodedOrganization);
-        $topContracts = $this->getTopContractsForOrganization($decodedOrganization);
+        $availableYears = Cache::remember("available_years_{$decodedOrganization}", 1800, function () use ($decodedOrganization) {
+            return $this->getAvailableYearsForOrganization($decodedOrganization);
+        });
+
+        // Default year for initial stats (will be overridden by frontend)
+        $defaultYear = $availableYears->first() ?? date('Y');
+
+        $contractsByYear = Cache::remember("org_yearly_{$decodedOrganization}", 600, function () use ($decodedOrganization) {
+            return $this->getContractsByYearForOrganization($decodedOrganization);
+        });
+
+        $organizationStats = Cache::remember("org_stats_{$decodedOrganization}_{$defaultYear}", 300, function () use ($decodedOrganization, $defaultYear) {
+            return $this->getOrganizationStats($decodedOrganization, $defaultYear);
+        });
+
         return view('organization.dashboard', compact(
             'decodedOrganization',
             'organizationStats',
-            'topVendorsForOrg',
             'contractsByYear',
-            'topContracts'
+            'availableYears'
         ));
     }
 
-    private function getOrganizationStats(string $organization): array
+    private function getOrganizationStats(string $organization, int $year): array
     {
-        $contracts = ProcurementContract::where('organization', $organization);
+        // Single optimized query for organization statistics
+        $stats = ProcurementContract::where('organization', $organization)
+            ->where('contract_year', $year)
+            ->selectRaw('
+                COUNT(*) as total_contracts,
+                SUM(total_contract_value) as total_spending,
+                AVG(total_contract_value) as avg_contract_value,
+                COUNT(DISTINCT vendor_name) as unique_vendors,
+                MIN(contract_date) as earliest_date,
+                MAX(contract_date) as latest_date
+            ')
+            ->whereNotNull('total_contract_value')
+            ->first();
 
         return [
-            'total_contracts' => $contracts->count(),
-            'total_spending' => $contracts->sum('total_contract_value'),
-            'avg_contract_value' => $contracts->avg('total_contract_value'),
-            'unique_vendors' => $contracts->distinct('vendor_name')->count(),
+            'total_contracts' => $stats->total_contracts ?? 0,
+            'total_spending' => $stats->total_spending ?? 0,
+            'avg_contract_value' => $stats->avg_contract_value ?? 0,
+            'unique_vendors' => $stats->unique_vendors ?? 0,
             'date_range' => [
-                'earliest' => $contracts->min('contract_date'),
-                'latest' => $contracts->max('contract_date'),
+                'earliest' => $stats->earliest_date,
+                'latest' => $stats->latest_date,
             ],
         ];
     }
 
-    private function getTopVendorsForOrganization(string $organization): \Illuminate\Support\Collection
+    private function getTopVendorsForOrganization(string $organization, int $year): \Illuminate\Support\Collection
     {
         return ProcurementContract::where('organization', $organization)
+            ->where('contract_year', $year)
             ->selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->whereNotNull('vendor_name')
             ->whereNotNull('total_contract_value')
@@ -209,9 +230,10 @@ class ProcurementContractController extends Controller
             ->get();
     }
 
-    private function getTopContractsForOrganization(string $organization): \Illuminate\Support\Collection
+    private function getTopContractsForOrganization(string $organization, int $year): \Illuminate\Support\Collection
     {
         return ProcurementContract::where('organization', $organization)
+            ->where('contract_year', $year)
             ->whereNotNull('total_contract_value')
             ->orderByDesc('total_contract_value')
             ->limit(20)
@@ -221,6 +243,15 @@ class ProcurementContractController extends Controller
     private function getAvailableYears(): \Illuminate\Support\Collection
     {
         return ProcurementContract::selectRaw('DISTINCT contract_year')
+            ->whereNotNull('contract_year')
+            ->orderByDesc('contract_year')
+            ->pluck('contract_year');
+    }
+
+    private function getAvailableYearsForOrganization(string $organization): \Illuminate\Support\Collection
+    {
+        return ProcurementContract::where('organization', $organization)
+            ->selectRaw('DISTINCT contract_year')
             ->whereNotNull('contract_year')
             ->orderByDesc('contract_year')
             ->pluck('contract_year');

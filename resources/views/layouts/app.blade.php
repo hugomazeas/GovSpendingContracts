@@ -88,6 +88,101 @@
     
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    
+    <!-- Global Year State Management -->
+    <script>
+        // Global Year State Manager
+        window.YearState = (function() {
+            const STORAGE_KEY = 'procurement_selected_year';
+            let currentYear = localStorage.getItem(STORAGE_KEY) || new Date().getFullYear().toString();
+            let listeners = [];
+            let availableYears = @json($availableYears ?? []);
+            
+            return {
+                // Get current selected year
+                get() {
+                    return currentYear;
+                },
+                
+                // Set current year and notify all listeners
+                set(year) {
+                    if (year && year !== currentYear) {
+                        currentYear = year.toString();
+                        localStorage.setItem(STORAGE_KEY, currentYear);
+                        this.notifyListeners(currentYear);
+                    }
+                },
+                
+                // Add listener for year changes
+                addListener(callback) {
+                    listeners.push(callback);
+                },
+                
+                // Remove listener
+                removeListener(callback) {
+                    const index = listeners.indexOf(callback);
+                    if (index > -1) {
+                        listeners.splice(index, 1);
+                    }
+                },
+                
+                // Notify all listeners of year change
+                notifyListeners(year) {
+                    listeners.forEach(callback => {
+                        try {
+                            callback(year);
+                        } catch (error) {
+                            console.error('Error in year change listener:', error);
+                        }
+                    });
+                },
+                
+                // Set available years
+                setAvailableYears(years) {
+                    availableYears = years;
+                },
+                
+                // Get available years
+                getAvailableYears() {
+                    return availableYears;
+                },
+                
+                // Initialize year selectors on page
+                initializeSelectors() {
+                    document.querySelectorAll('.year-selector').forEach(select => {
+                        // Set current value
+                        select.value = currentYear;
+                        
+                        // Add change listener
+                        select.addEventListener('change', function() {
+                            YearState.set(this.value);
+                        });
+                    });
+                },
+                
+                // Update all year selectors on page
+                updateSelectors(year) {
+                    document.querySelectorAll('.year-selector').forEach(select => {
+                        if (select.value !== year) {
+                            select.value = year;
+                        }
+                    });
+                }
+            };
+        })();
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            YearState.initializeSelectors();
+            
+            // Update selectors when year changes
+            YearState.addListener(function(year) {
+                YearState.updateSelectors(year);
+            });
+        });
+    </script>
+    
     @stack('scripts')
 </body>
 </html>
