@@ -18,10 +18,6 @@
                     <i class="fas fa-building-columns"></i>
                     <span>Organizations</span>
                 </a>
-                <a href="#" class="text-white/90 hover:text-white transition-colors duration-200 flex items-center space-x-2">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Analytics</span>
-                </a>
             </nav>
 
             <!-- Mobile menu button -->
@@ -35,11 +31,8 @@
             <a href="{{ url('/') }}" class="block text-white/90 hover:text-white transition-colors duration-200 py-2">
                 <i class="fas fa-home mr-2"></i>Dashboard
             </a>
-            <a href="#" class="block text-white/90 hover:text-white transition-colors duration-200 py-2">
-                <i class="fas fa-chart-bar mr-2"></i>Analytics
-            </a>
-            <a href="#" class="block text-white/90 hover:text-white transition-colors duration-200 py-2">
-                <i class="fas fa-info-circle mr-2"></i>About
+            <a href="{{ route('organizations.index') }}" class="block text-white/90 hover:text-white transition-colors duration-200 py-2">
+                <i class="fas fa-chart-bar mr-2"></i>Organizations
             </a>
         </div>
     </div>
