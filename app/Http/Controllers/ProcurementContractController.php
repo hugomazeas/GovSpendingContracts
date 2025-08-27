@@ -3,21 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProcurementContract;
+use App\Services\ProcurementAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class ProcurementContractController extends Controller
 {
+    public function __construct(
+        private readonly ProcurementAnalyticsService $analyticsService
+    ) {}
+
     public function index(Request $request): \Illuminate\Contracts\View\View
     {
         $availableYears = Cache::remember('available_years', 3600, function () {
-            return $this->getAvailableYears();
+            return $this->analyticsService->getAvailableYears();
         });
 
         // Default year for initial stats loading (will be overridden by frontend)
         $defaultYear = $availableYears->first() ?? date('Y');
         $stats = Cache::remember("dashboard_stats_{$defaultYear}", 300, function () use ($defaultYear) {
-            return $this->getStatistics($defaultYear);
+            return $this->analyticsService->getGeneralStatistics($defaultYear);
         });
 
         return view('procurement-contracts.dashboard', compact(
@@ -75,10 +80,14 @@ class ProcurementContractController extends Controller
         $data = $contracts->map(function ($contract) {
             return [
                 'reference_number' => $contract->reference_number,
-                'vendor_name' => $contract->vendor_name,
+                'vendor_name' => $contract->vendor_name ?
+                    '<a href="'.route('vendor.detail', rawurlencode($contract->vendor_name)).'" class="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">'.e($contract->vendor_name).'</a>' :
+                    '-',
                 'contract_date' => $contract->contract_date?->format('Y-m-d'),
                 'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
-                'organization' => $contract->organization,
+                'organization' => $contract->organization ?
+                    '<a href="'.route('organization.detail', ['organization' => urlencode($contract->organization)]).'" class="text-purple-600 hover:text-purple-800 hover:underline font-medium transition-colors">'.e($contract->organization).'</a>' :
+                    '-',
                 'description_of_work_english' => $contract->description_of_work_english ?
                     (strlen($contract->description_of_work_english) > 100 ?
                         substr($contract->description_of_work_english, 0, 100).'...' :
@@ -94,80 +103,23 @@ class ProcurementContractController extends Controller
         ]);
     }
 
-    private function getStatistics(int $year): array
-    {
-        // Single optimized query to get all statistics at once
-        $stats = ProcurementContract::where('contract_year', $year)
-            ->selectRaw('
-                COUNT(*) as total_contracts,
-                SUM(total_contract_value) as total_value,
-                AVG(total_contract_value) as avg_contract_value,
-                COUNT(DISTINCT vendor_name) as unique_vendors
-            ')
-            ->whereNotNull('total_contract_value')
-            ->first();
-
-        return [
-            'total_contracts' => $stats->total_contracts ?? 0,
-            'total_value' => $stats->total_value ?? 0,
-            'unique_vendors' => $stats->unique_vendors ?? 0,
-            'avg_contract_value' => $stats->avg_contract_value ?? 0,
-            'year' => $year,
-        ];
-    }
-
-    private function getTopVendorsByCount(int $year): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-            ->where('contract_year', $year)
-            ->whereNotNull('vendor_name')
-            ->groupBy('vendor_name')
-            ->orderByDesc('contract_count')
-            ->limit(10)
-            ->get();
-    }
-
-    private function getTopVendorsByValue(int $year): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-            ->where('contract_year', $year)
-            ->whereNotNull('vendor_name')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('vendor_name')
-            ->orderByDesc('total_value')
-            ->limit(10)
-            ->get();
-    }
-
-    private function getTopOrganizationsBySpending(int $year): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::selectRaw('organization, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
-            ->where('contract_year', $year)
-            ->whereNotNull('organization')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('organization')
-            ->orderByDesc('total_spending')
-            ->limit(10)
-            ->get();
-    }
-
     public function organizationDetail(Request $request, string $organization): \Illuminate\Contracts\View\View
     {
         $decodedOrganization = urldecode($organization);
 
         $availableYears = Cache::remember("available_years_{$decodedOrganization}", 1800, function () use ($decodedOrganization) {
-            return $this->getAvailableYearsForOrganization($decodedOrganization);
+            return $this->analyticsService->getAvailableYearsForOrganization($decodedOrganization);
         });
 
         // Default year for initial stats (will be overridden by frontend)
         $defaultYear = $availableYears->first() ?? date('Y');
 
         $contractsByYear = Cache::remember("org_yearly_{$decodedOrganization}", 600, function () use ($decodedOrganization) {
-            return $this->getContractsByYearForOrganization($decodedOrganization);
+            return $this->analyticsService->getContractsByYearForOrganization($decodedOrganization);
         });
 
         $organizationStats = Cache::remember("org_stats_{$decodedOrganization}_{$defaultYear}", 300, function () use ($decodedOrganization, $defaultYear) {
-            return $this->getOrganizationStats($decodedOrganization, $defaultYear);
+            return $this->analyticsService->getOrganizationStats($decodedOrganization, $defaultYear);
         });
 
         return view('organization.dashboard', compact(
@@ -178,82 +130,175 @@ class ProcurementContractController extends Controller
         ));
     }
 
-    private function getOrganizationStats(string $organization, int $year): array
+    public function vendorDetail(Request $request, string $vendor): \Illuminate\Contracts\View\View
     {
-        // Single optimized query for organization statistics
-        $stats = ProcurementContract::where('organization', $organization)
-            ->where('contract_year', $year)
-            ->selectRaw('
-                COUNT(*) as total_contracts,
-                SUM(total_contract_value) as total_spending,
-                AVG(total_contract_value) as avg_contract_value,
-                COUNT(DISTINCT vendor_name) as unique_vendors,
-                MIN(contract_date) as earliest_date,
-                MAX(contract_date) as latest_date
-            ')
-            ->whereNotNull('total_contract_value')
-            ->first();
+        $decodedVendor = urldecode($vendor);
 
-        return [
-            'total_contracts' => $stats->total_contracts ?? 0,
-            'total_spending' => $stats->total_spending ?? 0,
-            'avg_contract_value' => $stats->avg_contract_value ?? 0,
-            'unique_vendors' => $stats->unique_vendors ?? 0,
-            'date_range' => [
-                'earliest' => $stats->earliest_date,
-                'latest' => $stats->latest_date,
-            ],
-        ];
+        $availableYears = Cache::remember("available_years_vendor_{$decodedVendor}", 1800, function () use ($decodedVendor) {
+            return $this->analyticsService->getAvailableYearsForVendor($decodedVendor);
+        });
+
+        // Default year for initial stats (will be overridden by frontend)
+        $defaultYear = $availableYears->first() ?? date('Y');
+
+        $contractsByYear = Cache::remember("vendor_yearly_{$decodedVendor}", 600, function () use ($decodedVendor) {
+            return $this->analyticsService->getContractsByYearForVendor($decodedVendor);
+        });
+
+        $vendorStats = Cache::remember("vendor_stats_{$decodedVendor}_{$defaultYear}", 300, function () use ($decodedVendor, $defaultYear) {
+            return $this->analyticsService->getVendorStats($decodedVendor, $defaultYear);
+        });
+
+        return view('vendor.dashboard', compact(
+            'decodedVendor',
+            'vendorStats',
+            'contractsByYear',
+            'availableYears'
+        ));
     }
 
-    private function getTopVendorsForOrganization(string $organization, int $year): \Illuminate\Support\Collection
+    public function organizationsIndex(): \Illuminate\Contracts\View\View
     {
-        return ProcurementContract::where('organization', $organization)
-            ->where('contract_year', $year)
-            ->selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-            ->whereNotNull('vendor_name')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('vendor_name')
-            ->orderByDesc('total_value')
-            ->limit(10)
-            ->get();
+        return view('organizations.index');
     }
 
-    private function getContractsByYearForOrganization(string $organization): \Illuminate\Support\Collection
+    public function organizationsData(Request $request): \Illuminate\Http\JsonResponse
     {
-        return ProcurementContract::where('organization', $organization)
-            ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
-            ->whereNotNull('contract_year')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('contract_year')
-            ->orderBy('contract_year', 'desc')
-            ->get();
-    }
+        $searchValue = $request->search['value'] ?? '';
+        $orderColumn = $request->order[0]['column'] ?? 0;
+        $orderDir = $request->order[0]['dir'] ?? 'desc';
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
 
-    private function getTopContractsForOrganization(string $organization, int $year): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::where('organization', $organization)
-            ->where('contract_year', $year)
-            ->whereNotNull('total_contract_value')
-            ->orderByDesc('total_contract_value')
-            ->limit(20)
-            ->get(['vendor_name', 'total_contract_value', 'contract_date', 'description_of_work_english', 'reference_number']);
-    }
+        // Create cache key based on request parameters
+        $cacheKey = "organizations_data_" . md5(serialize([
+            'search' => $searchValue,
+            'order_col' => $orderColumn,
+            'order_dir' => $orderDir,
+            'start' => $start,
+            'length' => $length,
+        ]));
 
-    private function getAvailableYears(): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::selectRaw('DISTINCT contract_year')
-            ->whereNotNull('contract_year')
-            ->orderByDesc('contract_year')
-            ->pluck('contract_year');
-    }
+        return Cache::remember($cacheKey, 1800, function() use ($request, $searchValue, $orderColumn, $orderDir, $start, $length) {
+            // Get the last 4 years to calculate percentage changes (but only display 3)
+            $currentYear = date('Y');
+            $lastThreeYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3];
+            $fourthYear = $currentYear - 4;
+            $allYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3, $currentYear - 4];
 
-    private function getAvailableYearsForOrganization(string $organization): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::where('organization', $organization)
-            ->selectRaw('DISTINCT contract_year')
-            ->whereNotNull('contract_year')
-            ->orderByDesc('contract_year')
-            ->pluck('contract_year');
+            // Base query for organizations with their spending data
+            $query = ProcurementContract::selectRaw("
+                    organization,
+                    SUM(CASE WHEN contract_year = {$lastThreeYears[0]} THEN total_contract_value ELSE 0 END) as spending_year_1,
+                    SUM(CASE WHEN contract_year = {$lastThreeYears[1]} THEN total_contract_value ELSE 0 END) as spending_year_2,
+                    SUM(CASE WHEN contract_year = {$lastThreeYears[2]} THEN total_contract_value ELSE 0 END) as spending_year_3,
+                    SUM(CASE WHEN contract_year = {$fourthYear} THEN total_contract_value ELSE 0 END) as spending_year_4,
+                    SUM(total_contract_value) as total_spending
+                ")
+                ->whereNotNull('organization')
+                ->whereNotNull('total_contract_value')
+                ->whereIn('contract_year', $allYears)
+                ->groupBy('organization');
+
+            // Apply search filter
+            if (!empty($searchValue)) {
+                $query->where('organization', 'LIKE', "%{$searchValue}%");
+            }
+
+            // Clone query for counting
+            $totalRecords = Cache::remember("organizations_total_count", 3600, function() use ($allYears) {
+                return ProcurementContract::selectRaw('COUNT(DISTINCT organization) as count')
+                    ->whereNotNull('organization')
+                    ->whereNotNull('total_contract_value')
+                    ->whereIn('contract_year', $allYears)
+                    ->first()
+                    ->count ?? 0;
+            });
+
+            $filteredQuery = clone $query;
+            $filteredRecords = $filteredQuery->get()->count();
+
+            // Apply sorting
+            $columns = ['organization', 'spending_year_1', 'spending_year_2', 'spending_year_3'];
+            $orderByColumn = $columns[$orderColumn] ?? 'spending_year_1';
+
+            $query->orderBy($orderByColumn, $orderDir);
+
+            // Apply pagination
+            $organizations = $query->offset($start)
+                ->limit($length)
+                ->get();
+
+            $data = $organizations->map(function ($org) use ($lastThreeYears) {
+            $year1Spending = (float) $org->spending_year_1;
+            $year2Spending = (float) $org->spending_year_2;
+            $year3Spending = (float) $org->spending_year_3;
+            $year4Spending = (float) $org->spending_year_4;
+
+            // Calculate year-over-year percentage changes with HTML color coding
+            $change1to2 = '';
+            $change2to3 = '';
+            $change3to4 = '';
+
+            // Change from year 2 to year 1 (most recent change)
+            if ($year2Spending > 0) {
+                $percentageChange = (($year1Spending - $year2Spending) / $year2Spending) * 100;
+                if ($percentageChange > 0) {
+                    $change1to2 = '<span class="text-green-600">↗ +' . number_format($percentageChange, 1) . '%</span>';
+                } elseif ($percentageChange < 0) {
+                    $change1to2 = '<span class="text-red-600">↘ ' . number_format($percentageChange, 1) . '%</span>';
+                } else {
+                    $change1to2 = '<span class="text-gray-600">→ 0%</span>';
+                }
+            } elseif ($year1Spending > 0) {
+                $change1to2 = '--';
+            }
+
+            // Change from year 3 to year 2
+            if ($year3Spending > 0) {
+                $percentageChange = (($year2Spending - $year3Spending) / $year3Spending) * 100;
+                if ($percentageChange > 0) {
+                    $change2to3 = '<span class="text-green-600">↗ +' . number_format($percentageChange, 1) . '%</span>';
+                } elseif ($percentageChange < 0) {
+                    $change2to3 = '<span class="text-red-600">↘ ' . number_format($percentageChange, 1) . '%</span>';
+                } else {
+                    $change2to3 = '<span class="text-gray-600">→ 0%</span>';
+                }
+            } elseif ($year2Spending > 0) {
+                $change2to3 = '--';
+            }
+
+            // Change from year 4 to year 3 (oldest change)
+            if ($year4Spending > 0) {
+                $percentageChange = (($year3Spending - $year4Spending) / $year4Spending) * 100;
+                if ($percentageChange > 0) {
+                    $change3to4 = '<span class="text-green-600">↗ +' . number_format($percentageChange, 1) . '%</span>';
+                } elseif ($percentageChange < 0) {
+                    $change3to4 = '<span class="text-red-600">↘ ' . number_format($percentageChange, 1) . '%</span>';
+                } else {
+                    $change3to4 = '<span class="text-gray-600">→ 0%</span>';
+                }
+            } elseif ($year3Spending > 0) {
+                $change3to4 = '--';
+            }
+
+            return [
+                'organization' => '<a href="' . route('organization.detail', ['organization' => urlencode($org->organization)]) . '" class="text-purple-600 hover:text-purple-800 hover:underline font-medium transition-colors">' . e($org->organization) . '</a>',
+                'spending_' . $lastThreeYears[0] => $year1Spending > 0 ? '$' . number_format($year1Spending, 0) : '-',
+                'spending_' . $lastThreeYears[1] => $year2Spending > 0 ? '$' . number_format($year2Spending, 0) : '-',
+                'spending_' . $lastThreeYears[2] => $year3Spending > 0 ? '$' . number_format($year3Spending, 0) : '-',
+                'change_year_1' => $change1to2,
+                'change_year_2' => $change2to3,
+                'change_year_3' => $change3to4,
+            ];
+            });
+
+            return response()->json([
+                'draw' => intval($request->draw),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $filteredRecords,
+                'data' => $data,
+            ]);
+        });
     }
 }

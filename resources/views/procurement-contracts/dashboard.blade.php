@@ -42,18 +42,27 @@
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <div class="flex items-center gap-3">
                     <label for="year" class="text-lg font-semibold text-gray-700">Year:</label>
-                    <select id="year"
-                            class="year-selector px-4 py-3 text-xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-all duration-200">
-                        @foreach($availableYears as $year)
-                            <option value="{{ $year }}">{{ $year }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        <select id="year"
+                                class="year-selector px-4 py-3 text-xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-all duration-200">
+                            @foreach($availableYears as $year)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endforeach
+                        </select>
+                        <!-- Loading spinner overlay -->
+                        <div id="year-loading" class="absolute inset-0 bg-white bg-opacity-95 rounded-lg items-center justify-center hidden">
+                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="mt-4 text-sm text-gray-500">
-                Currently viewing: <span class="font-semibold text-indigo-600" id="current-year-display"></span>
-                procurement data
+                <span id="year-status-text">Currently viewing: <span class="font-semibold text-indigo-600" id="current-year-display"></span> procurement data</span>
+                <span id="year-loading-text" class="hidden">
+                    <i class="fas fa-spinner fa-spin mr-2 text-indigo-600"></i>
+                    <span class="font-semibold text-indigo-600">Loading data...</span>
+                </span>
             </div>
         </div>
     </div>
@@ -172,9 +181,55 @@
         document.addEventListener('DOMContentLoaded', function () {
             let governmentSpendingChart = null;
             let organizationsPieChart = null;
+            let isLoading = false;
 
             // Set available years in global state
             YearState.setAvailableYears(@json($availableYears->toArray()));
+
+            // Loading state management
+            function showLoadingState() {
+                if (isLoading) return; // Prevent multiple simultaneous loading states
+                
+                isLoading = true;
+                
+                // Show loading indicators
+                document.getElementById('year-loading').classList.remove('hidden');
+                document.getElementById('year-loading').classList.add('flex');
+                document.getElementById('year-status-text').classList.add('hidden');
+                document.getElementById('year-loading-text').classList.remove('hidden');
+                
+                // Disable year selector
+                document.querySelector('.year-selector').disabled = true;
+                document.querySelector('.year-selector').style.opacity = '0.7';
+                
+                // Freeze scroll
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+                document.body.style.top = `-${window.scrollY}px`;
+            }
+
+            function hideLoadingState() {
+                isLoading = false;
+                
+                // Hide loading indicators
+                document.getElementById('year-loading').classList.add('hidden');
+                document.getElementById('year-loading').classList.remove('flex');
+                document.getElementById('year-status-text').classList.remove('hidden');
+                document.getElementById('year-loading-text').classList.add('hidden');
+                
+                // Re-enable year selector
+                document.querySelector('.year-selector').disabled = false;
+                document.querySelector('.year-selector').style.opacity = '1';
+                
+                // Unfreeze scroll
+                const scrollY = document.body.style.top;
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+                document.body.style.top = '';
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
 
             // Update current year display
             function updateCurrentYearDisplay(year) {
@@ -192,23 +247,27 @@
 
             // Load dashboard data for specific year
             function loadDashboardData(year) {
+                showLoadingState();
+                
                 // Update current year display
                 updateCurrentYearDisplay(year);
 
-                // Load pie chart
-                loadOrganizationsPieChart(year);
-
-                // Load stats grid
-                loadStatsGrid(year);
-
-                // Load vendor leaderboards
-                loadVendorLeaderboards(year);
-
-                // Load organization leaderboard
-                loadOrganizationLeaderboard(year);
+                // Track loading promises
+                const loadingPromises = [
+                    loadOrganizationsPieChart(year),
+                    loadStatsGrid(year),
+                    loadVendorLeaderboards(year),
+                    loadOrganizationLeaderboard(year)
+                ];
 
                 // Update DataTable URL if it exists
                 updateDataTableUrl(year);
+
+                // Wait for all loading to complete
+                Promise.allSettled(loadingPromises).finally(() => {
+                    // Small delay to ensure smooth transition
+                    setTimeout(hideLoadingState, 300);
+                });
             }
 
             // Load government spending chart (independent of year selection)
@@ -351,7 +410,7 @@
 
             // Load organizations pie chart for specific year
             function loadOrganizationsPieChart(year) {
-                fetch(`{{ route('ajax.dashboard.organizations-pie-chart') }}?year=${year}`)
+                return fetch(`{{ route('ajax.dashboard.organizations-pie-chart') }}?year=${year}`)
                     .then(response => response.json())
                     .then(data => {
                         createOrganizationsPieChart(data);
@@ -451,7 +510,7 @@
             }
 
             function loadStatsGrid(year) {
-                fetch(`{{ route('ajax.dashboard.stats-grid') }}?year=${year}`)
+                return fetch(`{{ route('ajax.dashboard.stats-grid') }}?year=${year}`)
                     .then(response => response.json())
                     .then(data => {
                         const statsContainer = document.querySelector('.stats-grid-container');
@@ -465,7 +524,7 @@
             }
 
             function loadVendorLeaderboards(year) {
-                fetch(`{{ route('ajax.dashboard.vendor-leaderboards') }}?year=${year}`)
+                return fetch(`{{ route('ajax.dashboard.vendor-leaderboards') }}?year=${year}`)
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('vendor-leaderboards').innerHTML =
@@ -479,7 +538,7 @@
             }
 
             function loadOrganizationLeaderboard(year) {
-                fetch(`{{ route('ajax.dashboard.organization-leaderboard') }}?year=${year}`)
+                return fetch(`{{ route('ajax.dashboard.organization-leaderboard') }}?year=${year}`)
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('organization-leaderboard').innerHTML = data.html;

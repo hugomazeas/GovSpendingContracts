@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Ajax;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProcurementContract;
+use App\Services\ProcurementAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly ProcurementAnalyticsService $analyticsService
+    ) {}
+
     public function statsGrid(Request $request): \Illuminate\Http\JsonResponse
     {
         $selectedYear = $request->get('year', date('Y'));
@@ -16,7 +21,7 @@ class DashboardController extends Controller
         $cacheKey = "dashboard_stats_{$selectedYear}";
 
         $stats = Cache::remember($cacheKey, 300, function () use ($selectedYear) {
-            return $this->getStatistics($selectedYear);
+            return $this->analyticsService->getGeneralStatistics($selectedYear);
         });
 
         return response()->json([
@@ -32,8 +37,8 @@ class DashboardController extends Controller
 
         $data = Cache::remember($cacheKey, 300, function () use ($selectedYear) {
             return [
-                'topVendorsByCount' => $this->getTopVendorsByCount($selectedYear),
-                'topVendorsByValue' => $this->getTopVendorsByValue($selectedYear),
+                'topVendorsByCount' => $this->analyticsService->getTopVendorsByCount($selectedYear),
+                'topVendorsByValue' => $this->analyticsService->getTopVendorsByValue($selectedYear),
             ];
         });
 
@@ -62,7 +67,7 @@ class DashboardController extends Controller
         $cacheKey = "organization_leaderboard_{$selectedYear}";
 
         $organizations = Cache::remember($cacheKey, 300, function () use ($selectedYear) {
-            return $this->getTopOrganizationsBySpending($selectedYear);
+            return $this->analyticsService->getTopOrganizationsBySpending($selectedYear);
         });
 
         return response()->json([
@@ -76,7 +81,7 @@ class DashboardController extends Controller
     {
         $decodedOrganization = urldecode($organization);
         $selectedYear = $request->get('year');
-        $availableYears = $this->getAvailableYearsForOrganization($decodedOrganization);
+        $availableYears = $this->analyticsService->getAvailableYearsForOrganization($decodedOrganization);
 
         if (! $selectedYear || ! in_array($selectedYear, $availableYears->toArray())) {
             $selectedYear = $availableYears->first() ?? date('Y');
@@ -86,8 +91,8 @@ class DashboardController extends Controller
 
         $data = Cache::remember($cacheKey, 300, function () use ($decodedOrganization, $selectedYear) {
             return [
-                'topVendors' => $this->getTopVendorsForOrganization($decodedOrganization, $selectedYear),
-                'topContracts' => $this->getTopContractsForOrganization($decodedOrganization, $selectedYear),
+                'topVendors' => $this->analyticsService->getTopVendorsForOrganization($decodedOrganization, $selectedYear),
+                'topContracts' => $this->analyticsService->getTopContractsForOrganization($decodedOrganization, $selectedYear),
             ];
         });
 
@@ -107,7 +112,7 @@ class DashboardController extends Controller
     {
         $decodedOrganization = urldecode($organization);
         $selectedYear = $request->get('year');
-        $availableYears = $this->getAvailableYearsForOrganization($decodedOrganization);
+        $availableYears = $this->analyticsService->getAvailableYearsForOrganization($decodedOrganization);
 
         if (! $selectedYear || ! in_array($selectedYear, $availableYears->toArray())) {
             $selectedYear = $availableYears->first() ?? date('Y');
@@ -116,7 +121,7 @@ class DashboardController extends Controller
         $cacheKey = "org_stats_ajax_{$decodedOrganization}_{$selectedYear}";
 
         $stats = Cache::remember($cacheKey, 300, function () use ($decodedOrganization, $selectedYear) {
-            return $this->getOrganizationStats($decodedOrganization, $selectedYear);
+            return $this->analyticsService->getOrganizationStats($decodedOrganization, $selectedYear);
         });
 
         return response()->json([
@@ -178,13 +183,13 @@ class DashboardController extends Controller
 
         return response()->json($chartData);
     }
-    
+
     public function organizationsPieChart(Request $request): \Illuminate\Http\JsonResponse
     {
         $selectedYear = $request->get('year', date('Y'));
-        
+
         $cacheKey = "organizations_pie_chart_{$selectedYear}";
-        
+
         $chartData = Cache::remember($cacheKey, 300, function () use ($selectedYear) {
             // Get top 10 organizations by spending for the year
             $topOrganizations = ProcurementContract::where('contract_year', $selectedYear)
@@ -195,15 +200,15 @@ class DashboardController extends Controller
                 ->orderByDesc('total_spending')
                 ->limit(10)
                 ->get();
-            
+
             // Get total spending for the year to calculate "Others"
             $totalYearSpending = ProcurementContract::where('contract_year', $selectedYear)
                 ->whereNotNull('total_contract_value')
                 ->sum('total_contract_value');
-            
+
             $topOrganizationsSpending = $topOrganizations->sum('total_spending');
             $othersSpending = $totalYearSpending - $topOrganizationsSpending;
-            
+
             $labels = [];
             $data = [];
             $colors = [
@@ -217,149 +222,114 @@ class DashboardController extends Controller
                 'rgba(251, 146, 60, 0.8)',   // Orange - 8th
                 'rgba(244, 63, 94, 0.8)',    // Rose - 9th
                 'rgba(139, 92, 246, 0.8)',   // Purple variant - 10th
-                'rgba(156, 163, 175, 0.8)'   // Gray for others
+                'rgba(156, 163, 175, 0.8)',   // Gray for others
             ];
-            
+
             // Add top 10 organizations
             foreach ($topOrganizations as $org) {
-                $labels[] = strlen($org->organization) > 30 ? 
-                    substr($org->organization, 0, 30) . '...' : 
+                $labels[] = strlen($org->organization) > 30 ?
+                    substr($org->organization, 0, 30).'...' :
                     $org->organization;
                 $data[] = $org->total_spending;
             }
-            
+
             // Add "Others" if there's remaining spending
             if ($othersSpending > 0) {
                 $labels[] = 'Others';
                 $data[] = $othersSpending;
             }
-            
+
             return [
                 'labels' => $labels,
                 'data' => $data,
                 'colors' => array_slice($colors, 0, count($labels)),
                 'total' => $totalYearSpending,
-                'year' => $selectedYear
+                'year' => $selectedYear,
             ];
         });
 
         return response()->json($chartData);
     }
 
-    private function getTopVendorsByCount(int $year): \Illuminate\Support\Collection
+    public function vendorStats(Request $request, string $vendor): \Illuminate\Http\JsonResponse
     {
-        return ProcurementContract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-            ->where('contract_year', $year)
-            ->whereNotNull('vendor_name')
-            ->groupBy('vendor_name')
-            ->orderByDesc('contract_count')
-            ->limit(10)
-            ->get();
+        $decodedVendor = urldecode($vendor);
+        $selectedYear = $request->get('year');
+        $availableYears = $this->analyticsService->getAvailableYearsForVendor($decodedVendor);
+
+        if (! $selectedYear || ! in_array($selectedYear, $availableYears->toArray())) {
+            $selectedYear = $availableYears->first() ?? date('Y');
+        }
+
+        $cacheKey = "vendor_stats_ajax_{$decodedVendor}_{$selectedYear}";
+
+        $stats = Cache::remember($cacheKey, 300, function () use ($decodedVendor, $selectedYear) {
+            return $this->analyticsService->getVendorStats($decodedVendor, $selectedYear);
+        });
+
+        return response()->json([
+            'stats' => $stats,
+        ]);
     }
 
-    private function getTopVendorsByValue(int $year): \Illuminate\Support\Collection
+    public function vendorSpendingChart(Request $request, string $vendor): \Illuminate\Http\JsonResponse
     {
-        return ProcurementContract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-            ->where('contract_year', $year)
-            ->whereNotNull('vendor_name')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('vendor_name')
-            ->orderByDesc('total_value')
-            ->limit(10)
-            ->get();
+        $decodedVendor = urldecode($vendor);
+
+        $cacheKey = "vendor_revenue_chart_{$decodedVendor}";
+
+        $chartData = Cache::remember($cacheKey, 600, function () use ($decodedVendor) {
+            $revenueByYear = ProcurementContract::where('vendor_name', $decodedVendor)
+                ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
+                ->whereNotNull('contract_year')
+                ->whereNotNull('total_contract_value')
+                ->groupBy('contract_year')
+                ->orderBy('contract_year', 'asc')
+                ->get();
+
+            $years = $revenueByYear->pluck('contract_year')->toArray();
+            $revenue = $revenueByYear->pluck('total_value')->toArray();
+            $contracts = $revenueByYear->pluck('contract_count')->toArray();
+
+            return [
+                'years' => $years,
+                'revenue' => $revenue,
+                'contracts' => $contracts,
+            ];
+        });
+
+        return response()->json($chartData);
     }
 
-    private function getTopOrganizationsBySpending(int $year): \Illuminate\Support\Collection
+    public function vendorMinisterLeaderboard(Request $request, string $vendor): \Illuminate\Http\JsonResponse
     {
-        return ProcurementContract::selectRaw('organization, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
-            ->where('contract_year', $year)
-            ->whereNotNull('organization')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('organization')
-            ->orderByDesc('total_spending')
-            ->limit(10)
-            ->get();
-    }
+        $decodedVendor = urldecode($vendor);
+        $selectedYear = $request->get('year');
+        $availableYears = $this->analyticsService->getAvailableYearsForVendor($decodedVendor);
 
-    private function getTopVendorsForOrganization(string $organization, int $year): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::where('organization', $organization)
-            ->where('contract_year', $year)
-            ->selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-            ->whereNotNull('vendor_name')
-            ->whereNotNull('total_contract_value')
-            ->groupBy('vendor_name')
-            ->orderByDesc('total_value')
-            ->limit(10)
-            ->get();
-    }
+        if (! $selectedYear || ! in_array($selectedYear, $availableYears->toArray())) {
+            $selectedYear = $availableYears->first() ?? date('Y');
+        }
 
-    private function getTopContractsForOrganization(string $organization, int $year): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::where('organization', $organization)
-            ->where('contract_year', $year)
-            ->whereNotNull('total_contract_value')
-            ->orderByDesc('total_contract_value')
-            ->limit(20)
-            ->get(['vendor_name', 'total_contract_value', 'contract_date', 'description_of_work_english', 'reference_number']);
-    }
+        $cacheKey = "vendor_minister_leaderboard_{$decodedVendor}_{$selectedYear}";
 
-    private function getAvailableYearsForOrganization(string $organization): \Illuminate\Support\Collection
-    {
-        return ProcurementContract::where('organization', $organization)
-            ->selectRaw('DISTINCT contract_year')
-            ->whereNotNull('contract_year')
-            ->orderByDesc('contract_year')
-            ->pluck('contract_year');
-    }
+        $ministers = Cache::remember($cacheKey, 300, function () use ($decodedVendor, $selectedYear) {
+            return $this->analyticsService->getTopMinistersForVendor($decodedVendor, $selectedYear);
+        });
 
-    private function getStatistics(int $year): array
-    {
-        // Single optimized query to get all statistics at once
-        $stats = ProcurementContract::where('contract_year', $year)
-            ->selectRaw('
-                COUNT(*) as total_contracts,
-                SUM(total_contract_value) as total_value,
-                AVG(total_contract_value) as avg_contract_value,
-                COUNT(DISTINCT vendor_name) as unique_vendors
-            ')
-            ->whereNotNull('total_contract_value')
-            ->first();
-
-        return [
-            'total_contracts' => $stats->total_contracts ?? 0,
-            'total_value' => $stats->total_value ?? 0,
-            'unique_vendors' => $stats->unique_vendors ?? 0,
-            'avg_contract_value' => $stats->avg_contract_value ?? 0,
-            'year' => $year,
+        // Create chart data
+        $chartData = [
+            'labels' => $ministers->take(8)->pluck('organization')->map(function ($org) {
+                return strlen($org) > 25 ? substr($org, 0, 25).'...' : $org;
+            })->toArray(),
+            'values' => $ministers->take(8)->pluck('total_value')->toArray(),
         ];
-    }
 
-    private function getOrganizationStats(string $organization, int $year): array
-    {
-        // Single optimized query for organization statistics
-        $stats = ProcurementContract::where('organization', $organization)
-            ->where('contract_year', $year)
-            ->selectRaw('
-                COUNT(*) as total_contracts,
-                SUM(total_contract_value) as total_spending,
-                AVG(total_contract_value) as avg_contract_value,
-                COUNT(DISTINCT vendor_name) as unique_vendors,
-                MIN(contract_date) as earliest_date,
-                MAX(contract_date) as latest_date
-            ')
-            ->whereNotNull('total_contract_value')
-            ->first();
-
-        return [
-            'total_contracts' => $stats->total_contracts ?? 0,
-            'total_spending' => $stats->total_spending ?? 0,
-            'avg_contract_value' => $stats->avg_contract_value ?? 0,
-            'unique_vendors' => $stats->unique_vendors ?? 0,
-            'date_range' => [
-                'earliest' => $stats->earliest_date,
-                'latest' => $stats->latest_date,
-            ],
-        ];
+        return response()->json([
+            'html' => view('partials.vendor.minister-leaderboard', [
+                'ministers' => $ministers,
+            ])->render(),
+            'chartData' => $chartData,
+        ]);
     }
 }

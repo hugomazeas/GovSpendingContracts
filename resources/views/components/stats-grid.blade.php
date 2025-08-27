@@ -21,7 +21,7 @@
             <i class="fas fa-dollar-sign"></i>
         </div>
         <div class="text-3xl font-bold text-green-600 mb-2">
-            ${{ number_format($stats['total_value'] / 1000000000, 1) }}B
+            @currency($stats['total_value'])
         </div>
         <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
             Total Value
@@ -47,7 +47,7 @@
             <i class="fas fa-calculator"></i>
         </div>
         <div class="text-3xl font-bold text-amber-600 mb-2">
-            ${{ number_format($stats['avg_contract_value'] / 1000, 0) }}K
+            @currencyAvg($stats['avg_contract_value'])
         </div>
         <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
             Avg Contract Value

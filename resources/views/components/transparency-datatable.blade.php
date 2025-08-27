@@ -9,7 +9,7 @@
             How your tax dollars are being spent
         </div>
     </div>
-    
+
     <div class="overflow-x-auto">
         <table id="transparency-table" class="min-w-full">
             <thead>
@@ -18,19 +18,19 @@
                         Reference
                     </th>
                     <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
-                        Who Got Paid
+                        Vendor
                     </th>
                     <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
                         When
                     </th>
                     <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
-                        Amount
+                        Price
                     </th>
                     <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
-                        Government Dept
+                        Department
                     </th>
                     <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide max-w-xs">
-                        What For
+                        Description
                     </th>
                 </tr>
             </thead>
@@ -39,7 +39,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <div class="mt-4 p-4 bg-blue-50 rounded-lg">
         <div class="flex items-start space-x-3">
             <i class="fas fa-lightbulb text-blue-500 mt-0.5"></i>
@@ -55,7 +55,7 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#transparency-table').DataTable({
+    window.dataTable = $('#transparency-table').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
@@ -64,10 +64,14 @@ $(document).ready(function() {
         },
         columns: [
             { data: 'reference_number', name: 'reference_number', className: 'text-sm font-mono' },
-            { data: 'vendor_name', name: 'vendor_name', className: 'font-medium' },
+            { data: 'vendor_name', name: 'vendor_name', className: 'font-medium', render: function(data, type, row) {
+                return type === 'display' || type === 'type' ? data : $(data).text();
+            }},
             { data: 'contract_date', name: 'contract_date', className: 'text-sm' },
             { data: 'total_contract_value', name: 'total_contract_value', className: 'text-right font-semibold text-green-600' },
-            { data: 'organization', name: 'organization', className: 'text-sm' },
+            { data: 'organization', name: 'organization', className: 'text-sm', render: function(data, type, row) {
+                return type === 'display' || type === 'type' ? data : $(data).text();
+            }},
             { data: 'description_of_work_english', name: 'description_of_work_english', className: 'text-sm max-w-xs truncate' }
         ],
         order: [[2, 'desc']], // Order by date, newest first
@@ -83,7 +87,7 @@ $(document).ready(function() {
             zeroRecords: '<div class="text-center py-8"><i class="fas fa-search text-gray-400 text-2xl mb-2"></i><p class="text-gray-600">No matching spending records found</p></div>',
             paginate: {
                 first: "First",
-                last: "Last", 
+                last: "Last",
                 next: "Next",
                 previous: "Previous"
             }
@@ -106,15 +110,15 @@ $(document).ready(function() {
     .dataTables_wrapper .dataTables_length select {
         @apply border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
     }
-    
+
     .dataTables_wrapper .dataTables_paginate .paginate_button {
         @apply px-3 py-1 mx-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50;
     }
-    
+
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
         @apply bg-primary-500 text-white border-primary-500;
     }
-    
+
     table.dataTable tbody tr:hover {
         @apply bg-blue-50;
     }

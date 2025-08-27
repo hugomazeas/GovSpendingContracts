@@ -8,28 +8,28 @@
                     <p class="text-white/80 text-sm">Transparency in public spending</p>
                 </div>
             </div>
-            
+
             <nav class="hidden md:flex space-x-6">
                 <a href="{{ url('/') }}" class="text-white/90 hover:text-white transition-colors duration-200 flex items-center space-x-2">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="{{ route('organizations.index') }}" class="text-white/90 hover:text-white transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-building-columns"></i>
+                    <span>Organizations</span>
+                </a>
                 <a href="#" class="text-white/90 hover:text-white transition-colors duration-200 flex items-center space-x-2">
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </a>
-                <a href="#" class="text-white/90 hover:text-white transition-colors duration-200 flex items-center space-x-2">
-                    <i class="fas fa-info-circle"></i>
-                    <span>About</span>
-                </a>
             </nav>
-            
+
             <!-- Mobile menu button -->
             <button class="md:hidden text-white" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars text-xl"></i>
             </button>
         </div>
-        
+
         <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
             <a href="{{ url('/') }}" class="block text-white/90 hover:text-white transition-colors duration-200 py-2">

@@ -83,11 +83,7 @@
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="text-3xl font-bold text-green-600 mb-2" data-stat="total_spending">
-                @if($organizationStats['total_spending'] >= 1000000000)
-                    ${{ number_format($organizationStats['total_spending'] / 1000000000, 1) }}B
-                @else
-                    ${{ number_format($organizationStats['total_spending'] / 1000000, 1) }}M
-                @endif
+                @currency($organizationStats['total_spending'])
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
                 Total Spending
@@ -113,7 +109,7 @@
                 <i class="fas fa-calculator"></i>
             </div>
             <div class="text-3xl font-bold text-amber-600 mb-2" data-stat="avg_contract_value">
-                ${{ number_format($organizationStats['avg_contract_value'] / 1000, 0) }}K
+                @currencyAvg($organizationStats['avg_contract_value'])
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
                 Avg Contract Value
@@ -362,11 +358,17 @@
                 const totalSpendingEl = document.querySelector('[data-stat="total_spending"]');
                 if (totalSpendingEl) {
                     const spending = stats.total_spending;
+                    let formattedValue;
                     if (spending >= 1000000000) {
-                        totalSpendingEl.textContent = `$${(spending / 1000000000).toFixed(1)}B`;
+                        formattedValue = `$${(spending / 1000000000).toFixed(1)}B`;
+                    } else if (spending >= 1000000) {
+                        formattedValue = `$${(spending / 1000000).toFixed(1)}M`;
+                    } else if (spending >= 1000) {
+                        formattedValue = `$${(spending / 1000).toFixed(1)}K`;
                     } else {
-                        totalSpendingEl.textContent = `$${(spending / 1000000).toFixed(1)}M`;
+                        formattedValue = `$${Math.round(spending)}`;
                     }
+                    totalSpendingEl.textContent = formattedValue;
                 }
 
                 // Update Unique Vendors
@@ -378,7 +380,16 @@
                 // Update Average Contract Value
                 const avgContractEl = document.querySelector('[data-stat="avg_contract_value"]');
                 if (avgContractEl) {
-                    avgContractEl.textContent = `$${Math.round(stats.avg_contract_value / 1000)}K`;
+                    const value = stats.avg_contract_value;
+                    let formattedValue;
+                    if (value >= 1000000) {
+                        formattedValue = `$${(value / 1000000).toFixed(1)}M`;
+                    } else if (value >= 1000) {
+                        formattedValue = `$${Math.round(value / 1000)}K`;
+                    } else {
+                        formattedValue = `$${Math.round(value)}`;
+                    }
+                    avgContractEl.textContent = formattedValue;
                 }
             }
 
