@@ -8,8 +8,7 @@
                     About This Dashboard
                 </h3>
                 <p class="text-white/80 text-sm leading-relaxed">
-                    This dashboard provides transparent access to Canadian government procurement data,
-                    showing how taxpayer money is spent on contracts and services.
+                    This dashboard provides transparent access to Canadian government contracts .
                 </p>
             </div>
 
@@ -32,7 +31,7 @@
 
         <div class="border-t border-white/20 mt-8 pt-6 text-center">
             <p class="text-white/60 text-sm">
-                &copy; {{ date('Y') }} Government Procurement Dashboard.
+                &copy; {{ date('Y') }} Government Contracts Dashboard.
                 Built for transparency and public accountability.
             </p>
         </div>

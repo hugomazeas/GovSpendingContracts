@@ -124,6 +124,24 @@ $(document).ready(function() {
         order: [[1, 'desc']], // Order by most recent year spending by default
         pageLength: 25,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        responsive: {
+            details: {
+                type: 'column',
+                target: 0
+            }
+        },
+        columnDefs: [
+            {
+                className: 'dtr-control',
+                orderable: false,
+                targets: 0
+            },
+            {
+                targets: [1, 2, 3],
+                className: 'desktop'
+            }
+        ],
+        scrollX: true,
         language: {
             processing: '<div class="flex items-center justify-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mr-3"></div><span class="text-purple-600 font-medium">Loading organizations...</span></div>',
             search: "Search organizations:",
