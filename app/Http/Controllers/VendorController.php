@@ -4,38 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Models\ProcurementContract;
 use App\Services\ProcurementAnalyticsService;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
-class ProcurementContractController extends Controller
+class VendorController extends Controller
 {
     public function __construct(
         private readonly ProcurementAnalyticsService $analyticsService
     ) {}
 
-    public function index(Request $request): View
+    public function detail(Request $request, string $vendor): \Illuminate\Contracts\View\View
     {
-        $availableYears = Cache::remember('available_years', 3600, function () {
-            return $this->analyticsService->getAvailableYears();
+        $decodedVendor = urldecode($vendor);
+
+        $availableYears = Cache::remember("available_years_vendor_{$decodedVendor}", 1800, function () use ($decodedVendor) {
+            return $this->analyticsService->getAvailableYearsForVendor($decodedVendor);
         });
 
-        // Default year for initial stats loading (will be overridden by frontend)
+        // Default year for initial stats (will be overridden by frontend)
         $defaultYear = $availableYears->first() ?? date('Y');
-        $stats = Cache::remember("dashboard_stats_{$defaultYear}", 300, function () use ($defaultYear) {
-            return $this->analyticsService->getGeneralStatistics($defaultYear);
+
+        $contractsByYear = Cache::remember("vendor_yearly_{$decodedVendor}", 600, function () use ($decodedVendor) {
+            return $this->analyticsService->getContractsByYearForVendor($decodedVendor);
         });
 
-        return view('procurement-contracts.dashboard', compact(
-            'stats',
+        $vendorStats = Cache::remember("vendor_stats_{$decodedVendor}_{$defaultYear}", 300, function () use ($decodedVendor, $defaultYear) {
+            return $this->analyticsService->getVendorStats($decodedVendor, $defaultYear);
+        });
+
+        return view('vendor.dashboard', compact(
+            'decodedVendor',
+            'vendorStats',
+            'contractsByYear',
             'availableYears'
         ));
     }
 
-    public function data(Request $request): JsonResponse
+    public function contractsData(Request $request, string $vendor): JsonResponse
     {
-        $query = ProcurementContract::query();
+        $decodedVendor = urldecode($vendor);
+
+        $query = ProcurementContract::query()
+            ->where('vendor_name', $decodedVendor);
 
         // Filter by year - this is critical for performance
         $selectedYear = $request->get('year', date('Y'));
@@ -44,15 +55,16 @@ class ProcurementContractController extends Controller
         if ($request->has('search') && $request->search['value']) {
             $searchValue = $request->search['value'];
             $query->where(function ($q) use ($searchValue) {
-                $q->where('vendor_name', 'like', "%{$searchValue}%")
-                    ->orWhere('reference_number', 'like', "%{$searchValue}%")
+                $q->where('reference_number', 'like', "%{$searchValue}%")
                     ->orWhere('description_of_work_english', 'like', "%{$searchValue}%")
                     ->orWhere('organization', 'like', "%{$searchValue}%")
                     ->orWhere('commodity', 'like', "%{$searchValue}%");
             });
         }
 
-        $totalRecords = ProcurementContract::where('contract_year', $selectedYear)->count();
+        $totalRecords = ProcurementContract::where('vendor_name', $decodedVendor)
+            ->where('contract_year', $selectedYear)
+            ->count();
         $filteredRecords = $query->count();
 
         if ($request->has('order')) {
@@ -61,11 +73,10 @@ class ProcurementContractController extends Controller
 
             $columns = [
                 0 => 'reference_number',
-                1 => 'vendor_name',
-                2 => 'contract_date',
-                3 => 'total_contract_value',
-                4 => 'organization',
-                5 => 'description_of_work_english',
+                1 => 'contract_date',
+                2 => 'total_contract_value',
+                3 => 'organization',
+                4 => 'description_of_work_english',
             ];
 
             if (isset($columns[$columnIndex])) {
@@ -82,9 +93,6 @@ class ProcurementContractController extends Controller
         $data = $contracts->map(function ($contract) {
             return [
                 'reference_number' => $contract->reference_number,
-                'vendor_name' => $contract->vendor_name ?
-                    '<a href="'.route('vendor.detail', rawurlencode($contract->vendor_name)).'" class="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">'.e($contract->vendor_name).'</a>' :
-                    '-',
                 'contract_date' => $contract->contract_date?->format('Y-m-d'),
                 'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
                 'organization' => $contract->organization ?

@@ -11,7 +11,7 @@
             {{ number_format($stats['total_contracts']) }}
         </div>
         <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-            Total Contracts
+            {{ __('app.total_contracts') }}
         </div>
     </div>
 
@@ -24,7 +24,7 @@
             @currency($stats['total_value'])
         </div>
         <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-            Total Value
+            {{ __('app.total_value') }}
         </div>
     </div>
 
@@ -37,7 +37,7 @@
             {{ number_format($stats['unique_vendors']) }}
         </div>
         <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-            Unique Vendors
+            {{ __('app.unique_vendors') }}
         </div>
     </div>
 
@@ -50,7 +50,7 @@
             @currencyAvg($stats['avg_contract_value'])
         </div>
         <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-            Avg Contract Value
+            {{ __('app.avg_contract_value') }}
         </div>
     </div>
 </div>

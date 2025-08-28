@@ -7,7 +7,7 @@
     <div class="mb-6">
         <a href="{{ url('/') }}" class="btn-primary inline-flex items-center">
             <i class="fas fa-arrow-left mr-2"></i>
-            Back to Dashboard
+            {{ __('app.back_to_dashboard') }}
         </a>
     </div>
 
@@ -26,7 +26,7 @@
     <div class="card mb-16">
         <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
             <i class="fas fa-chart-line text-2xl text-blue-500 mr-3"></i>
-            <h3 class="text-xl font-semibold text-gray-800">Revenue of contracts with Canadian government</h3>
+            <h3 class="text-xl font-semibold text-gray-800">{{ __('app.revenue_of_contracts') }}</h3>
         </div>
         <div class="relative" style="height: 400px;">
             <canvas id="revenue-chart" class="w-full h-full"></canvas>
@@ -46,7 +46,7 @@
         <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto border-2 border-indigo-100">
             <div class="flex items-center justify-center mb-4">
                 <i class="fas fa-calendar-alt text-3xl text-indigo-600 mr-3"></i>
-                <h2 class="text-2xl font-bold text-gray-800">Filter by Year</h2>
+                <h2 class="text-2xl font-bold text-gray-800">{{ __('app.filter_by_year') }}</h2>
             </div>
             <p class="text-gray-600 mb-6">View {{ $decodedVendor }}'s contract data for a specific year</p>
 
@@ -69,7 +69,7 @@
 
     <!-- Statistics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <!-- Total Contracts -->
+        <!-- {{ __('app.total_contracts') }} -->
         <div class="stats-card">
             <div class="text-4xl text-blue-500 mb-4">
                 <i class="fas fa-file-contract"></i>
@@ -78,7 +78,7 @@
                 {{ number_format($vendorStats['total_contracts']) }}
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Total Contracts
+                {{ __('app.total_contracts') }}
             </div>
         </div>
 
@@ -87,15 +87,15 @@
             <div class="text-4xl text-green-500 mb-4">
                 <i class="fas fa-dollar-sign"></i>
             </div>
-            <div class="text-3xl font-bold text-green-600 mb-2" data-stat="total_value">
+            <div class="text-3xl font-bold mb-2" data-stat="total_value">
                 @currency($vendorStats['total_value'])
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Total Contract Value
+                {{ __('app.total_value') }}
             </div>
         </div>
 
-        <!-- Minister Clients -->
+        <!-- {{ __('app.minister_clients') }} -->
         <div class="stats-card">
             <div class="text-4xl text-purple-500 mb-4">
                 <i class="fas fa-building-columns"></i>
@@ -104,7 +104,7 @@
                 {{ number_format($vendorStats['minister_clients']) }}
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Minister Clients
+                {{ __('app.minister_clients') }}
             </div>
         </div>
 
@@ -117,18 +117,18 @@
                 @currencyAvg($vendorStats['avg_contract_value'])
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Avg Contract Value
+                {{ __('app.avg_contract_value') }}
             </div>
         </div>
     </div>
 
-    <!-- Minister Distribution and Leaderboard -->
+    <!-- {{ __('app.minister_distribution') }} and Leaderboard -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        <!-- Minister Distribution Pie Chart -->
+        <!-- {{ __('app.minister_distribution') }} Pie Chart -->
         <div class="card">
             <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                 <i class="fas fa-chart-pie text-2xl text-purple-500 mr-3"></i>
-                <h3 class="text-xl font-semibold text-gray-800">Minister Distribution</h3>
+                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.minister_distribution') }}</h3>
             </div>
             <div class="relative" style="height: 300px;">
                 <canvas id="minister-pie-chart" class="w-full h-full"></canvas>
@@ -143,11 +143,11 @@
             </div>
         </div>
 
-        <!-- Best Selling Ministers Leaderboard -->
+        <!-- {{ __('app.best_selling_ministers') }} Leaderboard -->
         <div class="card" id="minister-leaderboard">
             <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                 <i class="fas fa-trophy text-2xl text-amber-500 mr-3"></i>
-                <h3 class="text-xl font-semibold text-gray-800">Best Selling Ministers</h3>
+                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.best_selling_ministers') }}</h3>
             </div>
 
             <!-- Loading skeleton -->
@@ -166,6 +166,13 @@
                 @endfor
             </div>
         </div>
+    </div>
+
+    <!-- Vendor Contracts DataTable -->
+    <div class="mb-10" id="vendor-contracts-section">
+        <x-vendor-contracts-datatable
+            :ajaxUrl="route('vendor.contracts.data', ['vendor' => rawurlencode($decodedVendor)])"
+            :vendorName="$decodedVendor" />
     </div>
 
     <script>
@@ -222,7 +229,7 @@
                     data: {
                         labels: data.years,
                         datasets: [{
-                            label: 'Total Revenue',
+                            label: '{{ __('app.total_revenue') }}',
                             data: data.revenue,
                             borderColor: 'rgb(34, 197, 94)',
                             backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -268,8 +275,8 @@
                                         }
 
                                         return [
-                                            `Total Revenue: ${formattedValue}`,
-                                            `Contracts: ${contracts.toLocaleString()}`
+                                            `{{ __('app.total_revenue') }}: ${formattedValue}`,
+                                            `{{ __('app.contracts') }}: ${contracts.toLocaleString()}`
                                         ];
                                     }
                                 }
@@ -297,7 +304,7 @@
                             y: {
                                 title: {
                                     display: true,
-                                    text: 'Total Revenue',
+                                    text: '{{ __('app.total_revenue') }}',
                                     font: {
                                         size: 12,
                                         weight: 'bold'
@@ -350,7 +357,7 @@
             }
 
             function updateStatsGrid(stats) {
-                // Update Total Contracts
+                // Update {{ __('app.total_contracts') }}
                 const totalContractsEl = document.querySelector('[data-stat="total_contracts"]');
                 if (totalContractsEl) {
                     totalContractsEl.textContent = stats.total_contracts.toLocaleString();
@@ -373,7 +380,7 @@
                     totalValueEl.textContent = formattedValue;
                 }
 
-                // Update Minister Clients
+                // Update {{ __('app.minister_clients') }}
                 const ministerClientsEl = document.querySelector('[data-stat="minister_clients"]');
                 if (ministerClientsEl) {
                     ministerClientsEl.textContent = stats.minister_clients.toLocaleString();
@@ -402,7 +409,7 @@
                         document.getElementById('minister-leaderboard').innerHTML =
                             `<div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                                 <i class="fas fa-trophy text-2xl text-amber-500 mr-3"></i>
-                                <h3 class="text-xl font-semibold text-gray-800">Best Selling Ministers</h3>
+                                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.best_selling_ministers') }}</h3>
                             </div>
                             ${data.html}`;
                     })
@@ -510,6 +517,10 @@
             // Listen for year changes
             YearState.addListener(function(year) {
                 loadVendorData(year);
+                // Refresh the vendor contracts table if it exists
+                if (typeof window.vendorContractsTable !== 'undefined') {
+                    window.vendorContractsTable.ajax.reload();
+                }
             });
 
             // Load initial data

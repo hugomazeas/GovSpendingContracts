@@ -7,7 +7,7 @@
     <div class="mb-6">
         <a href="{{ url('/') }}" class="btn-primary inline-flex items-center">
             <i class="fas fa-arrow-left mr-2"></i>
-            Back to Dashboard
+            {{ __('app.back_to_dashboard') }}
         </a>
     </div>
 
@@ -18,7 +18,7 @@
             {{ $decodedOrganization }}
         </h1>
         <p class="text-xl text-gray-600">
-            Detailed spending analysis and contract breakdown
+            {{ __('app.detailed_spending_analysis') }}
         </p>
     </div>
 
@@ -41,7 +41,7 @@
         <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto border-2 border-indigo-100">
             <div class="flex items-center justify-center mb-4">
                 <i class="fas fa-calendar-alt text-3xl text-indigo-600 mr-3"></i>
-                <h2 class="text-2xl font-bold text-gray-800">Filter by Year</h2>
+                <h2 class="text-2xl font-bold text-gray-800">{{ __('app.filter_by_year') }}</h2>
             </div>
             <p class="text-gray-600 mb-6">View {{ $decodedOrganization }}'s procurement data for a specific year</p>
 
@@ -64,7 +64,7 @@
 
     <!-- Statistics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <!-- Total Contracts -->
+        <!-- {{ __('app.total_contracts') }} -->
         <div class="stats-card">
             <div class="text-4xl text-blue-500 mb-4">
                 <i class="fas fa-file-contract"></i>
@@ -73,11 +73,11 @@
                 {{ number_format($organizationStats['total_contracts']) }}
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Total Contracts
+                {{ __('app.total_contracts') }}
             </div>
         </div>
 
-        <!-- Total Spending -->
+        <!-- {{ __('app.total_spending') }} -->
         <div class="stats-card">
             <div class="text-4xl text-green-500 mb-4">
                 <i class="fas fa-dollar-sign"></i>
@@ -86,11 +86,11 @@
                 @currency($organizationStats['total_spending'])
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Total Spending
+                {{ __('app.total_spending') }}
             </div>
         </div>
 
-        <!-- Unique Vendors -->
+        <!-- {{ __('app.unique_vendors') }} -->
         <div class="stats-card">
             <div class="text-4xl text-indigo-500 mb-4">
                 <i class="fas fa-building"></i>
@@ -99,7 +99,7 @@
                 {{ number_format($organizationStats['unique_vendors']) }}
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Unique Vendors
+                {{ __('app.unique_vendors') }}
             </div>
         </div>
 
@@ -112,18 +112,18 @@
                 @currencyAvg($organizationStats['avg_contract_value'])
             </div>
             <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                Avg Contract Value
+                {{ __('app.avg_contract_value') }}
             </div>
         </div>
     </div>
 
-    <!-- Top Vendors and Yearly Spending -->
+    <!-- {{ __('app.top_vendors') }} and Yearly Spending -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        <!-- Top Vendors (Lazy Loaded) -->
+        <!-- {{ __('app.top_vendors') }} (Lazy Loaded) -->
         <div class="card" id="top-vendors">
             <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                 <i class="fas fa-trophy text-2xl text-amber-500 mr-3"></i>
-                <h3 class="text-xl font-semibold text-gray-800">Top Vendors</h3>
+                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.top_vendors') }}</h3>
             </div>
 
             <!-- Loading skeleton -->
@@ -147,7 +147,7 @@
         <div class="card" id="top-contracts">
             <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                 <i class="fas fa-list-alt text-2xl text-indigo-500 mr-3"></i>
-                <h3 class="text-xl font-semibold text-gray-800">Largest Contracts</h3>
+                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.largest_contract') }}</h3>
                 <div class="ml-auto text-sm text-gray-600">
                     <i class="fas fa-info-circle mr-1"></i>
                     Biggest individual spending items
@@ -227,7 +227,7 @@
                     data: {
                         labels: data.years,
                         datasets: [{
-                            label: 'Total Spending',
+                            label: '{{ __('app.total_spending') }}',
                             data: data.spending,
                             borderColor: 'rgb(59, 130, 246)',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -273,7 +273,7 @@
                                         }
 
                                         return [
-                                            `Total Spending: ${formattedValue}`,
+                                            `{{ __('app.total_spending') }}: ${formattedValue}`,
                                             `Contracts: ${contracts.toLocaleString()}`
                                         ];
                                     }
@@ -302,7 +302,7 @@
                             y: {
                                 title: {
                                     display: true,
-                                    text: 'Total Spending',
+                                    text: '{{ __('app.total_spending') }}',
                                     font: {
                                         size: 12,
                                         weight: 'bold'
@@ -354,7 +354,7 @@
                     totalContractsEl.textContent = stats.total_contracts.toLocaleString();
                 }
 
-                // Update Total Spending
+                // Update {{ __('app.total_spending') }}
                 const totalSpendingEl = document.querySelector('[data-stat="total_spending"]');
                 if (totalSpendingEl) {
                     const spending = stats.total_spending;
@@ -400,14 +400,14 @@
                         document.getElementById('top-vendors').innerHTML =
                             `<div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                                 <i class="fas fa-trophy text-2xl text-amber-500 mr-3"></i>
-                                <h3 class="text-xl font-semibold text-gray-800">Top Vendors</h3>
+                                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.top_vendors') }}</h3>
                             </div>
                             ${data.html.topVendors}`;
 
                         document.getElementById('top-contracts').innerHTML =
                             `<div class="flex items-center mb-6 pb-4 border-b border-gray-200">
                                 <i class="fas fa-list-alt text-2xl text-indigo-500 mr-3"></i>
-                                <h3 class="text-xl font-semibold text-gray-800">Largest Contracts</h3>
+                                <h3 class="text-xl font-semibold text-gray-800">{{ __('app.largest_contract') }}</h3>
                                 <div class="ml-auto text-sm text-gray-600">
                                     <i class="fas fa-info-circle mr-1"></i>
                                     Biggest individual spending items

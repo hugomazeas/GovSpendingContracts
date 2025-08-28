@@ -1,17 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Government Procurement Dashboard')
+@section('title', __('app.dashboard_title'))
 
 @section('content')
     <!-- Page Header -->
     <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-800 mb-4">
             <i class="fas fa-chart-line mr-3"></i>
-            Government Procurement Dashboard
+            {{ __('app.dashboard_title') }}
         </h1>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Comprehensive overview of government procurement contracts and vendor performance.
-            Transparency in how your tax dollars are spent.
+            {{ __('app.dashboard_subtitle') }}
         </p>
     </div>
     <!-- Government Spending Trends Chart -->
@@ -34,14 +33,13 @@
         <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto border-2 border-indigo-100">
             <div class="flex items-center justify-center mb-4">
                 <i class="fas fa-calendar-alt text-3xl text-indigo-600 mr-3"></i>
-                <h2 class="text-2xl font-bold text-gray-800">Filter by Year</h2>
+                <h2 class="text-2xl font-bold text-gray-800">{{ __('app.filter_by_year') }}</h2>
             </div>
-            <p class="text-gray-600 mb-6">View procurement data for a specific year to ensure accurate,
-                inflation-adjusted analysis</p>
+            <p class="text-gray-600 mb-6">{{ __('app.filter_description') }}</p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <div class="flex items-center gap-3">
-                    <label for="year" class="text-lg font-semibold text-gray-700">Year:</label>
+                    <label for="year" class="text-lg font-semibold text-gray-700">{{ __('app.year_label') }}</label>
                     <div class="relative">
                         <select id="year"
                                 class="year-selector px-4 py-3 text-xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-all duration-200">
@@ -58,10 +56,10 @@
             </div>
 
             <div class="mt-4 text-sm text-gray-500">
-                <span id="year-status-text">Currently viewing: <span class="font-semibold text-indigo-600" id="current-year-display"></span> procurement data</span>
+                <span id="year-status-text">{{ __('app.currently_viewing') }} <span class="font-semibold text-indigo-600" id="current-year-display"></span> {{ __('app.procurement_data') }}</span>
                 <span id="year-loading-text" class="hidden">
                     <i class="fas fa-spinner fa-spin mr-2 text-indigo-600"></i>
-                    <span class="font-semibold text-indigo-600">Loading data...</span>
+                    <span class="font-semibold text-indigo-600">{{ __('app.loading_data') }}</span>
                 </span>
             </div>
         </div>
@@ -73,12 +71,12 @@
             <div class="flex items-center mb-4 sm:mb-0">
                 <i class="fas fa-chart-pie text-2xl sm:text-3xl text-purple-600 mr-3"></i>
                 <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
-                    <span class="pie-chart-year-label">2025</span> Year Statistics
+                    {{ __('app.year_statistics') }} <span class="pie-chart-year-label">2025</span>
                 </h3>
             </div>
             <div class="sm:ml-auto text-sm text-gray-600">
                 <i class="fas fa-info-circle mr-1"></i>
-                <span class="pie-chart-year-label">2025</span> spending breakdown
+                {{ __('app.spending_breakdown') }} <span class="pie-chart-year-label">2025</span>
             </div>
         </div>
         <div class="flex flex-col lg:flex-row lg:justify-evenly gap-6">
@@ -189,19 +187,19 @@
             // Loading state management
             function showLoadingState() {
                 if (isLoading) return; // Prevent multiple simultaneous loading states
-                
+
                 isLoading = true;
-                
+
                 // Show loading indicators
                 document.getElementById('year-loading').classList.remove('hidden');
                 document.getElementById('year-loading').classList.add('flex');
                 document.getElementById('year-status-text').classList.add('hidden');
                 document.getElementById('year-loading-text').classList.remove('hidden');
-                
+
                 // Disable year selector
                 document.querySelector('.year-selector').disabled = true;
                 document.querySelector('.year-selector').style.opacity = '0.7';
-                
+
                 // Freeze scroll
                 document.body.style.overflow = 'hidden';
                 document.body.style.position = 'fixed';
@@ -211,17 +209,17 @@
 
             function hideLoadingState() {
                 isLoading = false;
-                
+
                 // Hide loading indicators
                 document.getElementById('year-loading').classList.add('hidden');
                 document.getElementById('year-loading').classList.remove('flex');
                 document.getElementById('year-status-text').classList.remove('hidden');
                 document.getElementById('year-loading-text').classList.add('hidden');
-                
+
                 // Re-enable year selector
                 document.querySelector('.year-selector').disabled = false;
                 document.querySelector('.year-selector').style.opacity = '1';
-                
+
                 // Unfreeze scroll
                 const scrollY = document.body.style.top;
                 document.body.style.overflow = '';
@@ -248,7 +246,7 @@
             // Load dashboard data for specific year
             function loadDashboardData(year) {
                 showLoadingState();
-                
+
                 // Update current year display
                 updateCurrentYearDisplay(year);
 

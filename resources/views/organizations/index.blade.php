@@ -1,17 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Organizations - Government Procurement Dashboard')
+@section('title', __('app.organizations_title'))
 
 @section('content')
     <!-- Page Header -->
     <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-800 mb-4">
             <i class="fas fa-building-columns mr-3 text-purple-600"></i>
-            Organizations
+            {{ __('app.organizations_title') }}
         </h1>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Government procurement spending by organization. We use the term "organization" because it includes 
-            non-ministerial entities, departments, agencies, and other government bodies involved in procurement processes.
+            {{ __('app.organizations_subtitle') }}
         </p>
     </div>
 
@@ -19,10 +18,10 @@
     <div class="card">
         <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
             <i class="fas fa-table text-2xl text-purple-600 mr-3"></i>
-            <h3 class="text-xl font-semibold text-gray-800">Organizations Spending Overview</h3>
+            <h3 class="text-xl font-semibold text-gray-800">{{ __('app.organizations_overview') }}</h3>
             <div class="ml-auto text-sm text-gray-600">
                 <i class="fas fa-info-circle mr-1"></i>
-                Last 3 years spending comparison
+                {{ __('app.last_years_comparison') }}
             </div>
         </div>
         
@@ -31,7 +30,7 @@
                 <thead>
                     <tr class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
                         <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
-                            Organization
+                            {{ __('app.organizations') }}
                         </th>
                         <th class="px-4 py-3 text-right text-sm font-semibold uppercase tracking-wide">
                             {{ date('Y') - 1 }}
@@ -54,8 +53,8 @@
             <div class="flex items-start space-x-3">
                 <i class="fas fa-lightbulb text-purple-500 mt-0.5"></i>
                 <div class="text-sm text-purple-700">
-                    <p class="font-medium mb-1">Understanding Organization Spending</p>
-                    <p>This table shows spending by government organizations over the last 3 years. The change indicator shows year-over-year percentage growth. Click on any organization to see detailed spending breakdown and vendor relationships.</p>
+                    <p class="font-medium mb-1">{{ __('app.understanding_organization_spending') }}</p>
+                    <p>{{ __('app.organization_spending_description') }}</p>
                 </div>
             </div>
         </div>
@@ -143,18 +142,18 @@ $(document).ready(function() {
         ],
         scrollX: true,
         language: {
-            processing: '<div class="flex items-center justify-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mr-3"></div><span class="text-purple-600 font-medium">Loading organizations...</span></div>',
-            search: "Search organizations:",
-            lengthMenu: "Show _MENU_ organizations per page",
-            info: "Showing _START_ to _END_ of _TOTAL_ organizations",
-            infoEmpty: "No organizations available",
-            infoFiltered: "(filtered from _MAX_ total organizations)",
-            zeroRecords: '<div class="text-center py-8"><i class="fas fa-search text-gray-400 text-2xl mb-2"></i><p class="text-gray-600">No matching organizations found</p></div>',
+            processing: '<div class="flex items-center justify-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mr-3"></div><span class="text-purple-600 font-medium">{{ __('app.loading_organizations') }}</span></div>',
+            search: "{{ __('app.search_organizations') }}",
+            lengthMenu: "{{ __('app.show_organizations_per_page') }}",
+            info: "{{ __('app.showing_organizations') }}",
+            infoEmpty: "{{ __('app.no_organizations_available') }}",
+            infoFiltered: "{{ __('app.organizations_filtered') }}",
+            zeroRecords: '<div class="text-center py-8"><i class="fas fa-search text-gray-400 text-2xl mb-2"></i><p class="text-gray-600">{{ __('app.no_matching_organizations') }}</p></div>',
             paginate: {
-                first: "First",
-                last: "Last",
-                next: "Next",
-                previous: "Previous"
+                first: "{{ __('app.first') }}",
+                last: "{{ __('app.last') }}",
+                next: "{{ __('app.next') }}",
+                previous: "{{ __('app.previous') }}"
             }
         },
         dom: '<"flex flex-col md:flex-row md:items-center md:justify-between mb-4"<"mb-2 md:mb-0"l><"relative"f>>rtip',
