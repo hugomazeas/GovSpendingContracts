@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Tailwind CSS -->
@@ -18,21 +18,83 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0f4ff',
-                            100: '#e0e9ff',
-                            500: '#667eea',
-                            600: '#5a6fd8',
-                            700: '#4c63d2',
-                            800: '#3e56cc',
-                            900: '#2e47c0',
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49',
                         },
                         secondary: {
-                            500: '#764ba2',
-                            600: '#6a42a0',
+                            50: '#fdf4ff',
+                            100: '#fae8ff',
+                            200: '#f5d0fe',
+                            300: '#f0abfc',
+                            400: '#e879f9',
+                            500: '#d946ef',
+                            600: '#c026d3',
+                            700: '#a21caf',
+                            800: '#86198f',
+                            900: '#701a75',
+                            950: '#4a044e',
+                        },
+                        accent: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        neutral: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
                         }
                     },
                     fontFamily: {
                         'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'heading': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-subtle': 'bounceSubtle 1s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+                        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
+                        'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
                     }
                 }
             }
@@ -41,44 +103,76 @@
     <style type="text/tailwindcss">
         @layer components {
             .btn-primary {
-                @apply bg-gradient-to-br from-primary-500 to-secondary-500 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+                @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold py-3 px-8 rounded-lg shadow-medium transition-all duration-300 hover:shadow-strong hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-primary-200;
+            }
+            
+            .btn-secondary {
+                @apply bg-white border-2 border-primary-200 text-primary-700 font-semibold py-3 px-8 rounded-lg shadow-soft transition-all duration-300 hover:bg-primary-50 hover:border-primary-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary-200;
             }
             
             .card {
-                @apply bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl transition-transform duration-300 hover:-translate-y-1;
+                @apply bg-white rounded-2xl p-8 shadow-soft border border-neutral-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
+            }
+            
+            .card-featured {
+                @apply bg-white rounded-2xl p-8 shadow-medium border-2 border-primary-100 transition-all duration-300 hover:shadow-strong hover:-translate-y-2 hover:border-primary-200;
             }
             
             .stats-card {
-                @apply bg-white rounded-2xl p-6 text-center shadow-xl transition-transform duration-300 hover:-translate-y-1;
+                @apply bg-gradient-to-br from-white to-neutral-50 rounded-2xl p-8 text-center shadow-soft border border-neutral-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:from-primary-50 hover:to-white;
+            }
+            
+            .stats-card-accent {
+                @apply bg-gradient-to-br from-accent-50 to-accent-100 rounded-2xl p-8 text-center shadow-soft border border-accent-200 transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
             }
             
             .vendor-item {
-                @apply flex items-center justify-between p-4 mb-3 bg-gray-50 rounded-xl transition-all duration-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 hover:translate-x-2 hover:-translate-y-0.5 hover:shadow-lg;
+                @apply flex items-center justify-between p-6 mb-4 bg-white rounded-xl shadow-soft border border-neutral-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:border-primary-200;
+            }
+            
+            .vendor-item-featured {
+                @apply flex items-center justify-between p-6 mb-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl shadow-soft border border-primary-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:from-primary-100 hover:to-accent-100;
             }
             
             .clickable-organization {
-                @apply cursor-pointer relative;
+                @apply cursor-pointer relative transition-all duration-300 hover:scale-105;
             }
             
             .vendor-item-link {
-                @apply text-inherit no-underline block;
+                @apply text-inherit no-underline block w-full;
             }
             
             .vendor-item-link:hover {
                 @apply text-inherit no-underline;
+            }
+            
+            .section-title {
+                @apply text-3xl font-bold font-heading text-neutral-900 mb-6;
+            }
+            
+            .section-subtitle {
+                @apply text-lg text-neutral-600 mb-8 max-w-2xl;
+            }
+            
+            .page-header {
+                @apply text-center mb-16;
+            }
+            
+            .gradient-text {
+                @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
             }
         }
     </style>
     
     @stack('styles')
 </head>
-<body class="min-h-screen bg-gradient-to-br from-primary-500 to-secondary-500 font-sans">
+<body class="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50 font-sans">
     <!-- Header -->
     <x-header />
     
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-2xl">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div class="animate-fade-in">
             @yield('content')
         </div>
     </main>

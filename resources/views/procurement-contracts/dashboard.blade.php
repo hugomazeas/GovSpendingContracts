@@ -3,177 +3,241 @@
 @section('title', __('app.dashboard_title'))
 
 @section('content')
-    <!-- Page Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-chart-line mr-3"></i>
-            {{ __('app.dashboard_title') }}
-        </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            {{ __('app.dashboard_subtitle') }}
-        </p>
+    <!-- Hero Section -->
+    <div class="page-header animate-slide-up">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-bold font-heading text-neutral-900 mb-6">
+                <span class="gradient-text">Government</span><br>
+                <span class="text-neutral-900">Contracts</span>
+                <div class="inline-flex items-center mt-2">
+                    <span class="gradient-text mr-4">Canada</span>
+                    <div class="w-8 h-5 rounded-sm shadow-soft bg-gradient-to-r from-red-500 via-white to-red-500 relative overflow-hidden">
+                        <div class="absolute inset-y-0 left-0 w-1/3 bg-red-500"></div>
+                        <div class="absolute inset-y-0 right-0 w-1/3 bg-red-500"></div>
+                        <div class="absolute inset-y-0 left-1/3 right-1/3 bg-white flex items-center justify-center">
+                            <div class="w-2 h-2 text-red-500 text-xs flex items-center justify-center">
+                                <i class="fas fa-maple-leaf text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </h1>
+            <p class="text-xl md:text-2xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
+                {{ __('app.dashboard_subtitle') }}
+            </p>
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#data-table" class="btn-primary inline-flex items-center justify-center">
+                    <i class="fas fa-search mr-2"></i>
+                    Explore Contracts
+                </a>
+                <a href="{{ route('organizations.index') }}" class="btn-secondary inline-flex items-center justify-center">
+                    <i class="fas fa-building-columns mr-2"></i>
+                    View Organizations
+                </a>
+            </div>
+        </div>
     </div>
     <!-- Government Spending Trends Chart -->
-    <div class="card mb-16">
-        <div class="relative" style="height: 400px;">
+    <div class="card-featured mb-20">
+        <div class="mb-8 text-center">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line text-primary-600 mr-3"></i>
+                Contract Award Trends
+            </h2>
+            <p class="section-subtitle mx-auto">
+                View announced government contract values across multiple years.
+            </p>
+        </div>
+        <div class="relative bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-6" style="height: 450px;">
             <canvas id="government-spending-chart" class="w-full h-full"></canvas>
 
             <!-- Loading state -->
             <div id="gov-chart-loading"
-                 class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+                 class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
                 <div class="text-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                    <p class="text-sm text-gray-600">Loading government spending trends...</p>
+                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary-200 border-t-primary-600 mx-auto mb-4"></div>
+                    <p class="text-neutral-600 font-medium">Loading spending trends...</p>
                 </div>
             </div>
         </div>
     </div>
     <!-- Year Filter - Primary Feature -->
-    <div class="text-center mb-10">
-        <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto border-2 border-indigo-100">
-            <div class="flex items-center justify-center mb-4">
-                <i class="fas fa-calendar-alt text-3xl text-indigo-600 mr-3"></i>
-                <h2 class="text-2xl font-bold text-gray-800">{{ __('app.filter_by_year') }}</h2>
+    <div class="text-center mb-16">
+        <div class="card-featured max-w-3xl mx-auto">
+            <div class="flex items-center justify-center mb-6">
+                <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl shadow-medium mr-4">
+                    <i class="fas fa-calendar-alt text-xl text-white"></i>
+                </div>
+                <h2 class="section-title mb-0">{{ __('app.filter_by_year') }}</h2>
             </div>
-            <p class="text-gray-600 mb-6">{{ __('app.filter_description') }}</p>
+            <p class="text-neutral-600 mb-8 text-lg">{{ __('app.filter_description') }}</p>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <div class="flex items-center gap-3">
-                    <label for="year" class="text-lg font-semibold text-gray-700">{{ __('app.year_label') }}</label>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <div class="flex items-center gap-4">
+                    <label for="year" class="text-lg font-semibold text-neutral-700 whitespace-nowrap">{{ __('app.year_label') }}</label>
                     <div class="relative">
                         <select id="year"
-                                class="year-selector px-4 py-3 text-xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-all duration-200">
+                                class="year-selector px-6 py-4 text-xl font-bold border-2 border-neutral-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white transition-all duration-300 shadow-soft hover:shadow-medium min-w-[120px]">
                             @foreach($availableYears as $year)
                                 <option value="{{ $year }}">{{ $year }}</option>
                             @endforeach
                         </select>
                         <!-- Loading spinner overlay -->
-                        <div id="year-loading" class="absolute inset-0 bg-white bg-opacity-95 rounded-lg items-center justify-center hidden">
-                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                        <div id="year-loading" class="absolute inset-0 bg-white bg-opacity-95 rounded-xl items-center justify-center hidden">
+                            <div class="animate-spin rounded-full h-6 w-6 border-4 border-primary-200 border-t-primary-600"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4 text-sm text-gray-500">
-                <span id="year-status-text">{{ __('app.currently_viewing') }} <span class="font-semibold text-indigo-600" id="current-year-display"></span> {{ __('app.procurement_data') }}</span>
-                <span id="year-loading-text" class="hidden">
-                    <i class="fas fa-spinner fa-spin mr-2 text-indigo-600"></i>
-                    <span class="font-semibold text-indigo-600">{{ __('app.loading_data') }}</span>
+            <div class="mt-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl">
+                <span id="year-status-text" class="text-neutral-700 font-medium">
+                    {{ __('app.currently_viewing') }} <span class="font-bold text-primary-700" id="current-year-display"></span> {{ __('app.procurement_data') }}
+                </span>
+                <span id="year-loading-text" class="hidden text-primary-700 font-medium">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                    {{ __('app.loading_data') }}
                 </span>
             </div>
         </div>
     </div>
 
-    <!-- Organization Spending Distribution Pie Chart -->
-    <div class="card mb-16">
-        <div class="flex flex-col sm:flex-row sm:items-center mb-6 pb-4 border-b border-gray-200">
-            <div class="flex items-center mb-4 sm:mb-0">
-                <i class="fas fa-chart-pie text-2xl sm:text-3xl text-purple-600 mr-3"></i>
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
-                    {{ __('app.year_statistics') }} <span class="pie-chart-year-label">2025</span>
-                </h3>
-            </div>
-            <div class="sm:ml-auto text-sm text-gray-600">
-                <i class="fas fa-info-circle mr-1"></i>
-                {{ __('app.spending_breakdown') }} <span class="pie-chart-year-label">2025</span>
-            </div>
+    <!-- Organization Spending Distribution Section -->
+    <div class="card-featured mb-20">
+        <div class="mb-8 text-center">
+            <h2 class="section-title">
+                <i class="fas fa-chart-pie text-secondary-600 mr-3"></i>
+                {{ __('app.year_statistics') }} <span class="pie-chart-year-label gradient-text font-bold">2025</span>
+            </h2>
+            <p class="section-subtitle mx-auto">
+                Contract announcements for <span class="pie-chart-year-label">2025</span> - breakdown by organization and key metrics.
+            </p>
         </div>
-        <div class="flex flex-col lg:flex-row lg:justify-evenly gap-6">
-            <div class="flex-1 max-w-full lg:max-w-md">
-                <div class="relative h-64 sm:h-80 lg:h-96">
-                    <canvas id="organizations-pie-chart" class="w-full h-full"></canvas>
-                    <!-- Loading state -->
-                    <div id="pie-chart-loading"
-                         class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
-                        <div class="text-center">
-                            <div class="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
-                            <p class="text-xs sm:text-sm text-gray-600">Loading spending distribution...</p>
+        
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center">
+            <!-- Pie Chart -->
+            <div class="relative">
+                <div class="bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-8 shadow-soft">
+                    <div class="relative h-80 lg:h-96">
+                        <canvas id="organizations-pie-chart" class="w-full h-full"></canvas>
+                        <!-- Loading state -->
+                        <div id="pie-chart-loading"
+                             class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
+                            <div class="text-center">
+                                <div class="animate-spin rounded-full h-10 w-10 border-4 border-secondary-200 border-t-secondary-600 mx-auto mb-4"></div>
+                                <p class="text-neutral-600 font-medium">Loading spending distribution...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Statistics Grid -->
-            <div class="flex-1 stats-grid-container">
+            <div class="stats-grid-container">
                 <x-stats-grid :stats="$stats"/>
             </div>
         </div>
     </div>
 
-    <!-- Vendor Leaderboards - First Row (Lazy Loaded) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8" id="vendor-leaderboards">
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 animate-pulse">
-            <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
-                <div class="w-8 h-8 bg-gray-300 rounded mr-3"></div>
-                <div class="h-6 bg-gray-300 rounded w-48"></div>
-            </div>
-            <div class="space-y-4">
-                @for($i = 0; $i < 5; $i++)
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
-                            <div class="space-y-2">
-                                <div class="h-4 bg-gray-300 rounded w-32"></div>
-                                <div class="h-3 bg-gray-300 rounded w-20"></div>
-                            </div>
-                        </div>
-                        <div class="h-6 bg-gray-300 rounded w-16"></div>
-                    </div>
-                @endfor
-            </div>
+    <!-- Key Insights Section -->
+    <div class="mb-16">
+        <div class="text-center mb-12">
+            <h2 class="section-title">
+                <i class="fas fa-trophy text-yellow-500 mr-3"></i>
+                Top Contract Recipients & Organizations
+            </h2>
+            <p class="section-subtitle mx-auto">
+                See which vendors and organizations receive the most announced government contracts by volume and value.
+            </p>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 animate-pulse">
-            <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
-                <div class="w-8 h-8 bg-gray-300 rounded mr-3"></div>
-                <div class="h-6 bg-gray-300 rounded w-48"></div>
-            </div>
-            <div class="space-y-4">
-                @for($i = 0; $i < 5; $i++)
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
-                            <div class="space-y-2">
-                                <div class="h-4 bg-gray-300 rounded w-32"></div>
-                                <div class="h-3 bg-gray-300 rounded w-20"></div>
-                            </div>
-                        </div>
-                        <div class="h-6 bg-gray-300 rounded w-16"></div>
-                    </div>
-                @endfor
-            </div>
-        </div>
-    </div>
-
-    <!-- Organization Leaderboard - Second Row (Lazy Loaded) -->
-    <div class="flex justify-center mb-8">
-        <div class="w-full max-w-4xl" id="organization-leaderboard">
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 animate-pulse">
-                <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
-                    <div class="w-8 h-8 bg-gray-300 rounded mr-3"></div>
-                    <div class="h-6 bg-gray-300 rounded w-64"></div>
+        
+        <!-- Vendor Leaderboards -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12" id="vendor-leaderboards">
+            <div class="card animate-pulse">
+                <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
+                    <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
+                    <div class="h-6 bg-neutral-300 rounded w-48"></div>
                 </div>
                 <div class="space-y-4">
-                    @for($i = 0; $i < 8; $i++)
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    @for($i = 0; $i < 5; $i++)
+                        <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
                             <div class="flex items-center space-x-4">
-                                <div class="w-10 h-8 bg-gray-300 rounded"></div>
+                                <div class="w-8 h-8 bg-neutral-300 rounded-full flex-shrink-0"></div>
                                 <div class="space-y-2">
-                                    <div class="h-4 bg-gray-300 rounded w-48"></div>
-                                    <div class="h-3 bg-gray-300 rounded w-24"></div>
+                                    <div class="h-4 bg-neutral-300 rounded w-32"></div>
+                                    <div class="h-3 bg-neutral-300 rounded w-20"></div>
                                 </div>
                             </div>
-                            <div class="h-6 bg-gray-300 rounded w-20"></div>
+                            <div class="h-6 bg-neutral-300 rounded w-16 flex-shrink-0"></div>
                         </div>
                     @endfor
+                </div>
+            </div>
+
+            <div class="card animate-pulse">
+                <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
+                    <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
+                    <div class="h-6 bg-neutral-300 rounded w-48"></div>
+                </div>
+                <div class="space-y-4">
+                    @for($i = 0; $i < 5; $i++)
+                        <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 bg-neutral-300 rounded-full flex-shrink-0"></div>
+                                <div class="space-y-2">
+                                    <div class="h-4 bg-neutral-300 rounded w-32"></div>
+                                    <div class="h-3 bg-neutral-300 rounded w-20"></div>
+                                </div>
+                            </div>
+                            <div class="h-6 bg-neutral-300 rounded w-16 flex-shrink-0"></div>
+                        </div>
+                    @endfor
+                </div>
+            </div>
+        </div>
+
+        <!-- Organization Leaderboard -->
+        <div class="flex justify-center">
+            <div class="w-full max-w-5xl" id="organization-leaderboard">
+                <div class="card animate-pulse">
+                    <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
+                        <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
+                        <div class="h-6 bg-neutral-300 rounded w-64"></div>
+                    </div>
+                    <div class="space-y-4">
+                        @for($i = 0; $i < 8; $i++)
+                            <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-8 bg-neutral-300 rounded flex-shrink-0"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-4 bg-neutral-300 rounded w-48"></div>
+                                        <div class="h-3 bg-neutral-300 rounded w-24"></div>
+                                    </div>
+                                </div>
+                                <div class="h-6 bg-neutral-300 rounded w-20 flex-shrink-0"></div>
+                            </div>
+                        @endfor
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Public Transparency DataTable -->
-    <x-transparency-datatable ajax-url="{{ route('contracts.data') }}"/>
+    <div class="mb-16" id="data-table">
+        <div class="text-center mb-12">
+            <h2 class="section-title">
+                <i class="fas fa-table text-primary-600 mr-3"></i>
+                Contract Announcements Database
+            </h2>
+            <p class="section-subtitle mx-auto">
+                Search and explore the government's announced procurement contracts with detailed information.
+            </p>
+        </div>
+        <div class="card-featured">
+            <x-transparency-datatable ajax-url="{{ route('contracts.data') }}"/>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

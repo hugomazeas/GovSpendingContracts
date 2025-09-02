@@ -2,21 +2,21 @@
 
 return [
     // Header/Navigation
-    'site_title' => 'Government Procurement Dashboard',
-    'site_description' => 'Transparency in public spending',
-    'dashboard' => 'Dashboard',
+    'site_title' => 'Government Contracts',
+    'site_description' => 'What the government announces',
+    'dashboard' => 'Overview',
     'organizations' => 'Organizations',
     'analytics' => 'Analytics',
     'about' => 'About',
 
     // Dashboard
-    'dashboard_title' => 'Government Procurement Dashboard',
-    'dashboard_subtitle' => 'Comprehensive overview of government procurement contracts and vendor performance. Transparency in how your tax dollars are spent.',
+    'dashboard_title' => 'Government Contracts',
+    'dashboard_subtitle' => 'Here\'s what the government announces about procurement contracts and vendor relationships.',
     'filter_by_year' => 'Filter by Year',
-    'filter_description' => 'View procurement data for a specific year to ensure accurate, inflation-adjusted analysis',
+    'filter_description' => 'View contract announcements for a specific year',
     'year_label' => 'Year:',
     'currently_viewing' => 'Currently viewing:',
-    'procurement_data' => 'procurement data',
+    'procurement_data' => 'contract data',
     'loading_data' => 'Loading data...',
     'year_statistics' => 'Year Statistics: ',
     'spending_breakdown' => ':year spending breakdown',
@@ -60,8 +60,8 @@ return [
     'best_selling_ministers' => 'Best Selling Ministers',
 
     // DataTable
-    'public_spending_transparency' => 'Public Spending Transparency',
-    'transparency_subtitle' => 'How your tax dollars are being spent',
+    'public_spending_transparency' => 'Government Contract Announcements',
+    'transparency_subtitle' => 'What the government has announced',
     'reference' => 'Reference',
     'vendor' => 'Vendor',
     'when' => 'When',
@@ -128,11 +128,11 @@ return [
     'previous' => 'Previous',
     'new' => 'New',
     'no_data' => 'No data',
-    'understanding_government_spending' => 'Understanding Government Spending',
-    'government_spending_description' => 'This table shows real government contracts funded by taxpayers. Use the search to find specific companies, departments, or services. Click on any organization above to see their detailed spending breakdown.',
+    'understanding_government_spending' => 'Understanding Government Contracts',
+    'government_spending_description' => 'This table shows government contract announcements. Use the search to find specific companies, departments, or services. Click on any organization above to see their detailed contract breakdown.',
 
     // Footer
-    'footer_text' => 'Government Procurement Transparency Portal - Ensuring accountability in public spending.',
+    'footer_text' => 'Government Contracts Portal - Tracking announced procurement activity.',
     'built_with' => 'Built with',
     'for_transparency' => 'for transparency',
 

@@ -2,21 +2,21 @@
 
 return [
     // Header/Navigation
-    'site_title' => 'Tableau de Bord des Achats Gouvernementaux',
-    'site_description' => 'Transparence dans les dépenses publiques',
-    'dashboard' => 'Tableau de Bord',
+    'site_title' => 'Contrats Gouvernementaux',
+    'site_description' => 'Ce que le gouvernement annonce',
+    'dashboard' => 'Aperçu',
     'organizations' => 'Organisations',
     'analytics' => 'Analytiques',
     'about' => 'À Propos',
 
     // Dashboard
-    'dashboard_title' => 'Tableau de Bord des Achats Gouvernementaux',
-    'dashboard_subtitle' => 'Aperçu complet des contrats d\'approvisionnement gouvernementaux et de la performance des fournisseurs. Transparence sur l\'utilisation de vos impôts.',
+    'dashboard_title' => 'Contrats Gouvernementaux',
+    'dashboard_subtitle' => 'Voici ce que le gouvernement annonce concernant les contrats d\'approvisionnement et les relations avec les fournisseurs.',
     'filter_by_year' => 'Filtrer par Année',
-    'filter_description' => 'Voir les données d\'approvisionnement pour une année spécifique afin d\'assurer une analyse précise, ajustée à l\'inflation',
+    'filter_description' => 'Voir les annonces de contrats pour une année spécifique',
     'year_label' => 'Année :',
     'currently_viewing' => 'Actuellement en cours de consultation :',
-    'procurement_data' => 'données d\'approvisionnement',
+    'procurement_data' => 'données de contrats',
     'loading_data' => 'Chargement des données...',
     'year_statistics' => 'Statistiques de l\'année: ',
     'spending_breakdown' => 'Répartition des dépenses ',
@@ -52,8 +52,8 @@ return [
     'best_selling_ministers' => 'Meilleurs Ministères Clients',
 
     // DataTable
-    'public_spending_transparency' => 'Transparence des Dépenses Publiques',
-    'transparency_subtitle' => 'Comment vos impôts sont dépensés',
+    'public_spending_transparency' => 'Annonces de Contrats Gouvernementaux',
+    'transparency_subtitle' => 'Ce que le gouvernement a annoncé',
     'reference' => 'Référence',
     'vendor' => 'Fournisseur',
     'when' => 'Quand',
@@ -120,11 +120,11 @@ return [
     'previous' => 'Précédent',
     'new' => 'Nouveau',
     'no_data' => 'Aucune donnée',
-    'understanding_government_spending' => 'Comprendre les Dépenses Gouvernementales',
-    'government_spending_description' => 'Ce tableau montre les vrais contrats gouvernementaux financés par les contribuables. Utilisez la recherche pour trouver des entreprises, départements ou services spécifiques. Cliquez sur n\'importe quelle organisation ci-dessus pour voir sa répartition détaillée des dépenses.',
+    'understanding_government_spending' => 'Comprendre les Contrats Gouvernementaux',
+    'government_spending_description' => 'Ce tableau montre les annonces de contrats gouvernementaux. Utilisez la recherche pour trouver des entreprises, départements ou services spécifiques. Cliquez sur n\'importe quelle organisation ci-dessus pour voir sa répartition détaillée des contrats.',
 
     // Footer
-    'footer_text' => 'Portail de Transparence des Achats Gouvernementaux - Assurer la responsabilité dans les dépenses publiques.',
+    'footer_text' => 'Portail des Contrats Gouvernementaux - Suivi des activités d\'approvisionnement annoncées.',
     'built_with' => 'Construit avec',
     'for_transparency' => 'pour la transparence',
 
