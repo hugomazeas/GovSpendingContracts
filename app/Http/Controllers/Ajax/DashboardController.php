@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Ajax;
 use App\Http\Controllers\Controller;
 use App\Models\ProcurementContract;
 use App\Services\ProcurementAnalyticsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,7 +15,7 @@ class DashboardController extends Controller
         private readonly ProcurementAnalyticsService $analyticsService
     ) {}
 
-    public function statsGrid(Request $request): \Illuminate\Http\JsonResponse
+    public function statsGrid(Request $request): JsonResponse
     {
         $selectedYear = $request->get('year', date('Y'));
 
@@ -29,7 +30,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function vendorLeaderboards(Request $request): \Illuminate\Http\JsonResponse
+    public function vendorLeaderboards(Request $request): JsonResponse
     {
         $selectedYear = $request->get('year', date('Y'));
 
@@ -60,7 +61,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function organizationLeaderboard(Request $request): \Illuminate\Http\JsonResponse
+    public function organizationLeaderboard(Request $request): JsonResponse
     {
         $selectedYear = $request->get('year', date('Y'));
 
@@ -77,7 +78,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function organizationDetails(Request $request, string $organization): \Illuminate\Http\JsonResponse
+    public function organizationDetails(Request $request, string $organization): JsonResponse
     {
         $decodedOrganization = urldecode($organization);
         $selectedYear = $request->get('year');
@@ -100,6 +101,7 @@ class DashboardController extends Controller
             'html' => [
                 'topVendors' => view('partials.organization.top-vendors', [
                     'topVendorsForOrg' => $data['topVendors'],
+                    'organizationName' => $decodedOrganization,
                 ])->render(),
                 'topContracts' => view('partials.organization.top-contracts', [
                     'topContracts' => $data['topContracts'],
@@ -108,7 +110,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function organizationStats(Request $request, string $organization): \Illuminate\Http\JsonResponse
+    public function organizationStats(Request $request, string $organization): JsonResponse
     {
         $decodedOrganization = urldecode($organization);
         $selectedYear = $request->get('year');
@@ -129,7 +131,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function organizationSpendingChart(Request $request, string $organization): \Illuminate\Http\JsonResponse
+    public function organizationSpendingChart(Request $request, string $organization): JsonResponse
     {
         $decodedOrganization = urldecode($organization);
 
@@ -158,7 +160,7 @@ class DashboardController extends Controller
         return response()->json($chartData);
     }
 
-    public function governmentSpendingChart(Request $request): \Illuminate\Http\JsonResponse
+    public function governmentSpendingChart(Request $request): JsonResponse
     {
         $cacheKey = 'government_spending_chart';
 
@@ -184,7 +186,7 @@ class DashboardController extends Controller
         return response()->json($chartData);
     }
 
-    public function organizationsPieChart(Request $request): \Illuminate\Http\JsonResponse
+    public function organizationsPieChart(Request $request): JsonResponse
     {
         $selectedYear = $request->get('year', date('Y'));
 
@@ -251,7 +253,7 @@ class DashboardController extends Controller
         return response()->json($chartData);
     }
 
-    public function vendorStats(Request $request, string $vendor): \Illuminate\Http\JsonResponse
+    public function vendorStats(Request $request, string $vendor): JsonResponse
     {
         $decodedVendor = urldecode($vendor);
         $selectedYear = $request->get('year');
@@ -272,7 +274,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function vendorSpendingChart(Request $request, string $vendor): \Illuminate\Http\JsonResponse
+    public function vendorSpendingChart(Request $request, string $vendor): JsonResponse
     {
         $decodedVendor = urldecode($vendor);
 
@@ -301,7 +303,7 @@ class DashboardController extends Controller
         return response()->json($chartData);
     }
 
-    public function vendorMinisterLeaderboard(Request $request, string $vendor): \Illuminate\Http\JsonResponse
+    public function vendorMinisterLeaderboard(Request $request, string $vendor): JsonResponse
     {
         $decodedVendor = urldecode($vendor);
         $selectedYear = $request->get('year');
@@ -328,8 +330,55 @@ class DashboardController extends Controller
         return response()->json([
             'html' => view('partials.vendor.minister-leaderboard', [
                 'ministers' => $ministers,
+                'vendorName' => $decodedVendor,
             ])->render(),
             'chartData' => $chartData,
         ]);
+    }
+
+    public function vendorOrganizationStats(Request $request, string $vendor, string $organization): JsonResponse
+    {
+        $decodedVendor = urldecode($vendor);
+        $decodedOrganization = urldecode($organization);
+        $selectedYear = $request->get('year');
+        $availableYears = $this->analyticsService->getAvailableYearsForVendorOrganization($decodedVendor, $decodedOrganization);
+
+        if (! $selectedYear || ! in_array($selectedYear, $availableYears->toArray())) {
+            $selectedYear = $availableYears->first() ?? date('Y');
+        }
+
+        $cacheKey = "vendor_org_stats_ajax_{$decodedVendor}_{$decodedOrganization}_{$selectedYear}";
+
+        $stats = Cache::remember($cacheKey, 300, function () use ($decodedVendor, $decodedOrganization, $selectedYear) {
+            return $this->analyticsService->getVendorOrganizationStats($decodedVendor, $decodedOrganization, $selectedYear);
+        });
+
+        return response()->json([
+            'stats' => $stats,
+        ]);
+    }
+
+    public function vendorOrganizationSpendingChart(Request $request, string $vendor, string $organization): JsonResponse
+    {
+        $decodedVendor = urldecode($vendor);
+        $decodedOrganization = urldecode($organization);
+
+        $cacheKey = "vendor_org_spending_chart_{$decodedVendor}_{$decodedOrganization}";
+
+        $chartData = Cache::remember($cacheKey, 600, function () use ($decodedVendor, $decodedOrganization) {
+            $spendingByYear = $this->analyticsService->getVendorOrganizationSpendingOverTime($decodedVendor, $decodedOrganization);
+
+            $years = $spendingByYear->pluck('contract_year')->toArray();
+            $spending = $spendingByYear->pluck('total_value')->toArray();
+            $contracts = $spendingByYear->pluck('contract_count')->toArray();
+
+            return [
+                'years' => $years,
+                'spending' => $spending,
+                'contracts' => $contracts,
+            ];
+        });
+
+        return response()->json($chartData);
     }
 }

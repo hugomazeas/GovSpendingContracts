@@ -14,10 +14,15 @@ Route::get('/contracts/data', [ProcurementContractController::class, 'data'])->n
 Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
 Route::get('/organizations/data', [OrganizationController::class, 'data'])->name('organizations.data');
 Route::get('/organization/{organization}', [OrganizationController::class, 'detail'])->name('organization.detail');
+Route::get('/organization/{organization}/contracts/data', [OrganizationController::class, 'contractsData'])->name('organization.contracts.data');
 
 // Vendor routes
 Route::get('/vendor/{vendor}', [VendorController::class, 'detail'])->name('vendor.detail');
 Route::get('/vendor/{vendor}/contracts/data', [VendorController::class, 'contractsData'])->name('vendor.contracts.data');
+
+// Vendor-Organization contract routes
+Route::get('/vendor/{vendor}/organization/{organization}', [VendorController::class, 'vendorOrganizationContracts'])->name('vendor.organization.contracts');
+Route::get('/vendor/{vendor}/organization/{organization}/data', [VendorController::class, 'vendorOrganizationContractsData'])->name('vendor.organization.contracts.data');
 
 // Language switching
 Route::get('/language/{locale}', function ($locale) {
@@ -41,4 +46,6 @@ Route::prefix('ajax')->group(function () {
     Route::get('/vendor/{vendor}/stats', [DashboardController::class, 'vendorStats'])->name('ajax.vendor.stats');
     Route::get('/vendor/{vendor}/spending-chart', [DashboardController::class, 'vendorSpendingChart'])->name('ajax.vendor.spending-chart');
     Route::get('/vendor/{vendor}/minister-leaderboard', [DashboardController::class, 'vendorMinisterLeaderboard'])->name('ajax.vendor.minister-leaderboard');
+    Route::get('/vendor/{vendor}/organization/{organization}/stats', [DashboardController::class, 'vendorOrganizationStats'])->name('ajax.vendor.organization.stats');
+    Route::get('/vendor/{vendor}/organization/{organization}/spending-chart', [DashboardController::class, 'vendorOrganizationSpendingChart'])->name('ajax.vendor.organization.spending-chart');
 });

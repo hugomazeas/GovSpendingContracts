@@ -186,4 +186,78 @@ class OrganizationController extends Controller
             'availableYears'
         ));
     }
+
+    public function contractsData(Request $request, string $organization): JsonResponse
+    {
+        $decodedOrganization = urldecode($organization);
+
+        $query = ProcurementContract::query()
+            ->where('organization', $decodedOrganization);
+
+        $selectedYear = $request->get('year');
+        if (! $selectedYear) {
+            // Get the most recent year with data for this organization
+            $selectedYear = $this->analyticsService->getAvailableYearsForOrganization($decodedOrganization)->first() ?? date('Y');
+        }
+        $query->where('contract_year', $selectedYear);
+
+        if ($request->has('search') && $request->search['value']) {
+            $searchValue = $request->search['value'];
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('vendor_name', 'like', "%{$searchValue}%")
+                    ->orWhere('reference_number', 'like', "%{$searchValue}%")
+                    ->orWhere('description_of_work_english', 'like', "%{$searchValue}%");
+            });
+        }
+
+        $totalRecords = ProcurementContract::where('organization', $decodedOrganization)
+            ->where('contract_year', $selectedYear)
+            ->count();
+        $filteredRecords = $query->count();
+
+        if ($request->has('order')) {
+            $columnIndex = $request->order[0]['column'];
+            $sortDirection = $request->order[0]['dir'];
+
+            $columns = [
+                0 => 'vendor_name',
+                1 => 'reference_number',
+                2 => 'contract_date',
+                3 => 'total_contract_value',
+                4 => 'description_of_work_english',
+            ];
+
+            if (isset($columns[$columnIndex])) {
+                $query->orderBy($columns[$columnIndex], $sortDirection);
+            }
+        } else {
+            $query->orderBy('contract_date', 'desc');
+        }
+
+        $contracts = $query->offset($request->start ?? 0)
+            ->limit($request->length ?? 10)
+            ->get();
+
+        $data = $contracts->map(function ($contract) use ($decodedOrganization) {
+            return [
+                'vendor_name' => $contract->vendor_name ?
+                    '<div class="flex flex-col gap-1"><a href="'.route('vendor.detail', ['vendor' => urlencode($contract->vendor_name)]).'" class="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">'.e($contract->vendor_name).'</a><a href="'.route('vendor.organization.contracts', ['vendor' => urlencode($contract->vendor_name), 'organization' => urlencode($decodedOrganization)]).'" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-medium transition-colors"><i class="fas fa-handshake mr-1"></i>View partnership</a></div>' :
+                    '-',
+                'reference_number' => $contract->reference_number,
+                'contract_date' => $contract->contract_date?->format('Y-m-d'),
+                'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
+                'description_of_work_english' => $contract->description_of_work_english ?
+                    (strlen($contract->description_of_work_english) > 100 ?
+                        substr($contract->description_of_work_english, 0, 100).'...' :
+                        $contract->description_of_work_english) : '-',
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data,
+        ]);
+    }
 }

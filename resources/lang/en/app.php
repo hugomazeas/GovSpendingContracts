@@ -150,4 +150,16 @@ return [
     'showing_contracts' => 'Showing _START_ to _END_ of _TOTAL_ contracts',
     'no_contracts_available' => 'No contracts available',
     'no_matching_contracts' => 'No matching contracts found',
+
+    // Vendor-Organization Contract Page
+    'contracts_between' => 'Contracts between',
+    'reference_number' => 'Reference Number',
+    'contract_date' => 'Contract Date',
+    'spending_over_time' => 'Spending Over Time',
+    'back_to_vendor' => 'Back to Vendor',
+    'back_to_organization' => 'Back to Organization',
+
+    // Organization Contracts DataTable
+    'organization_contracts' => 'Organization Contracts',
+    'vendor_name' => 'Vendor Name',
 ];

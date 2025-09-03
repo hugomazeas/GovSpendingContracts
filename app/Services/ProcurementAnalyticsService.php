@@ -205,4 +205,52 @@ class ProcurementAnalyticsService
             ->orderByDesc('contract_year')
             ->pluck('contract_year');
     }
+
+    public function getAvailableYearsForVendorOrganization(string $vendor, string $organization): Collection
+    {
+        return ProcurementContract::where('vendor_name', $vendor)
+            ->where('organization', $organization)
+            ->selectRaw('DISTINCT contract_year')
+            ->whereNotNull('contract_year')
+            ->orderByDesc('contract_year')
+            ->pluck('contract_year');
+    }
+
+    public function getVendorOrganizationStats(string $vendor, string $organization, int $year): array
+    {
+        $stats = ProcurementContract::where('vendor_name', $vendor)
+            ->where('organization', $organization)
+            ->where('contract_year', $year)
+            ->selectRaw('
+                COUNT(*) as total_contracts,
+                SUM(total_contract_value) as total_value,
+                AVG(total_contract_value) as avg_contract_value,
+                MIN(contract_date) as earliest_date,
+                MAX(contract_date) as latest_date
+            ')
+            ->whereNotNull('total_contract_value')
+            ->first();
+
+        return [
+            'total_contracts' => $stats->total_contracts ?? 0,
+            'total_value' => $stats->total_value ?? 0,
+            'avg_contract_value' => $stats->avg_contract_value ?? 0,
+            'date_range' => [
+                'earliest' => $stats->earliest_date,
+                'latest' => $stats->latest_date,
+            ],
+        ];
+    }
+
+    public function getVendorOrganizationSpendingOverTime(string $vendor, string $organization): Collection
+    {
+        return ProcurementContract::where('vendor_name', $vendor)
+            ->where('organization', $organization)
+            ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
+            ->whereNotNull('contract_year')
+            ->whereNotNull('total_contract_value')
+            ->groupBy('contract_year')
+            ->orderBy('contract_year', 'asc')
+            ->get();
+    }
 }

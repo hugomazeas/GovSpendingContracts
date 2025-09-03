@@ -142,4 +142,16 @@ return [
     'showing_contracts' => 'Affichage de _START_ à _END_ sur _TOTAL_ contrats',
     'no_contracts_available' => 'Aucun contrat disponible',
     'no_matching_contracts' => 'Aucun contrat correspondant trouvé',
+
+    // Vendor-Organization Contract Page
+    'contracts_between' => 'Contrats entre',
+    'reference_number' => 'Numéro de référence',
+    'contract_date' => 'Date du contrat',
+    'spending_over_time' => 'Dépenses au fil du temps',
+    'back_to_vendor' => 'Retour au fournisseur',
+    'back_to_organization' => 'Retour à l\'organisation',
+
+    // Organization Contracts DataTable
+    'organization_contracts' => 'Contrats de l\'organisation',
+    'vendor_name' => 'Nom du fournisseur',
 ];
