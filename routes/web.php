@@ -40,6 +40,7 @@ Route::prefix('ajax')->group(function () {
     Route::get('/dashboard/organizations-pie-chart', [DashboardController::class, 'organizationsPieChart'])->name('ajax.dashboard.organizations-pie-chart');
     Route::get('/dashboard/vendor-leaderboards', [DashboardController::class, 'vendorLeaderboards'])->name('ajax.dashboard.vendor-leaderboards');
     Route::get('/dashboard/organization-leaderboard', [DashboardController::class, 'organizationLeaderboard'])->name('ajax.dashboard.organization-leaderboard');
+    Route::get('/dashboard/historical-totals', [DashboardController::class, 'dashboardHistoricalTotals'])->name('ajax.dashboard.historical-totals');
     Route::get('/organization/{organization}/stats', [DashboardController::class, 'organizationStats'])->name('ajax.organization.stats');
     Route::get('/organization/{organization}/spending-chart', [DashboardController::class, 'organizationSpendingChart'])->name('ajax.organization.spending-chart');
     Route::get('/organization/{organization}/details', [DashboardController::class, 'organizationDetails'])->name('ajax.organization.details');
@@ -48,4 +49,6 @@ Route::prefix('ajax')->group(function () {
     Route::get('/vendor/{vendor}/minister-leaderboard', [DashboardController::class, 'vendorMinisterLeaderboard'])->name('ajax.vendor.minister-leaderboard');
     Route::get('/vendor/{vendor}/organization/{organization}/stats', [DashboardController::class, 'vendorOrganizationStats'])->name('ajax.vendor.organization.stats');
     Route::get('/vendor/{vendor}/organization/{organization}/spending-chart', [DashboardController::class, 'vendorOrganizationSpendingChart'])->name('ajax.vendor.organization.spending-chart');
+    Route::get('/vendor/{vendor}/organization/{organization}/historical-totals', [DashboardController::class, 'vendorOrganizationHistoricalTotals'])->name('ajax.vendor.organization.historical-totals');
+    Route::get('/vendor/{vendor}/historical-totals', [DashboardController::class, 'vendorHistoricalTotals'])->name('ajax.vendor.historical-totals');
 });

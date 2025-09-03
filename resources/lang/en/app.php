@@ -162,4 +162,15 @@ return [
     // Organization Contracts DataTable
     'organization_contracts' => 'Organization Contracts',
     'vendor_name' => 'Vendor Name',
+
+    // Historical Partnership Totals
+    'historical_partnership_totals' => 'Historical Partnership Totals',
+    'historical_vendor_totals' => 'Historical Vendor Performance',
+    'historical_government_totals' => 'Historical Government Contract Overview',
+    'total_inflation_adjusted_value' => 'Inflation-Adjusted Total',
+    'adjusted_to_current_dollars' => 'Adjusted to current dollars using 2.2% annual inflation rate',
+    'total_contracts_all_years' => 'Total Contracts',
+    'across_all_available_years' => 'Across all available years in the database',
+    'partnership_contracts_description' => 'Partnership contract data between :vendor and :organization, filtered by selected year for detailed analysis.',
+    'revenue_of_contracts' => 'Revenue from Government Contracts',
 ];

@@ -20,13 +20,16 @@ class HelpersServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register Blade directives for currency formatting
         Blade::directive('currency', function ($expression) {
             return "<?php echo App\Helpers\CurrencyFormatter::format({$expression}); ?>";
         });
 
         Blade::directive('currencyAvg', function ($expression) {
             return "<?php echo App\Helpers\CurrencyFormatter::formatAverage({$expression}); ?>";
+        });
+
+        Blade::directive('currencyInflationAdjusted', function ($expression) {
+            return "<?php echo App\Helpers\CurrencyFormatter::calculateInflationAdjusted({$expression}); ?>";
         });
     }
 }

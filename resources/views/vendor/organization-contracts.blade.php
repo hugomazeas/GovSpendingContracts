@@ -32,24 +32,15 @@
         </p>
     </div>
 
-    <!-- Spending Over Time Chart -->
-    <div class="card mb-16">
-        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
-            <i class="fas fa-chart-line text-2xl text-blue-500 mr-3"></i>
-            <h3 class="text-xl font-semibold text-gray-800">{{ __('app.spending_over_time') }}</h3>
-        </div>
-        <div class="relative" style="height: 400px;">
-            <canvas id="spending-chart" class="w-full h-full"></canvas>
-
-            <!-- Loading state -->
-            <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                    <p class="text-sm text-gray-600">Loading spending data...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Historical Overview & Spending Chart -->
+    <x-historical-overview-with-chart
+        :title="__('app.historical_partnership_totals')"
+        :description="'Complete contract history and spending trends for ' . $decodedVendor . ' & ' . $decodedOrganization"
+        :chartTitle="__('app.spending_over_time')"
+        chartId="spending-chart"
+        chartLoadingId="chart-loading"
+        totalValueId="total-inflation-adjusted-value"
+        totalCountId="total-contracts-count" />
 
     <!-- Year Filter -->
     <div class="text-center mb-10">
@@ -356,12 +347,44 @@
                 }
             });
 
+            // Load historical totals (all years combined)
+            function loadHistoricalTotals() {
+                fetch(`/ajax/vendor/${vendor}/organization/${organization}/historical-totals`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateHistoricalTotals(data);
+                    })
+                    .catch(error => {
+                        console.error('Error loading historical totals:', error);
+                        // Show error state
+                        document.getElementById('total-inflation-adjusted-value').innerHTML =
+                            '<span class="text-red-500">Error loading data</span>';
+                        document.getElementById('total-contracts-count').innerHTML =
+                            '<span class="text-red-500">Error loading data</span>';
+                    });
+            }
+
+            function updateHistoricalTotals(data) {
+                // Update inflation-adjusted total value
+                const totalValueEl = document.getElementById('total-inflation-adjusted-value');
+                if (totalValueEl && data.inflation_adjusted_total) {
+                    totalValueEl.textContent = data.inflation_adjusted_total;
+                }
+
+                // Update total contracts count
+                const totalContractsEl = document.getElementById('total-contracts-count');
+                if (totalContractsEl && data.total_contracts) {
+                    totalContractsEl.textContent = data.total_contracts.toLocaleString();
+                }
+            }
+
             // Load initial data
             const finalYear = YearState.get();
             loadVendorOrganizationData(finalYear);
 
-            // Load spending chart (independent of year selection)
+            // Load spending chart and historical totals (independent of year selection)
             loadSpendingChart();
+            loadHistoricalTotals();
         });
     </script>
 @endsection

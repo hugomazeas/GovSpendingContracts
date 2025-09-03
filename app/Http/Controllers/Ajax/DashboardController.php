@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Ajax;
 
+use App\Helpers\CurrencyFormatter;
 use App\Http\Controllers\Controller;
 use App\Models\ProcurementContract;
 use App\Services\ProcurementAnalyticsService;
@@ -380,5 +381,106 @@ class DashboardController extends Controller
         });
 
         return response()->json($chartData);
+    }
+
+    public function vendorOrganizationHistoricalTotals(string $vendor, string $organization): JsonResponse
+    {
+        $decodedVendor = urldecode($vendor);
+        $decodedOrganization = urldecode($organization);
+
+        $cacheKey = "vendor_org_historical_totals_{$decodedVendor}_{$decodedOrganization}";
+
+        $historicalData = Cache::remember($cacheKey, 1800, function () use ($decodedVendor, $decodedOrganization) {
+            // Get all contracts for this vendor-organization partnership across all years
+            $contracts = ProcurementContract::where('vendor_name', $decodedVendor)
+                ->where('organization', $decodedOrganization)
+                ->whereNotNull('total_contract_value')
+                ->select('total_contract_value', 'contract_year')
+                ->get();
+
+            $totalContracts = $contracts->count();
+            $totalValue = $contracts->sum('total_contract_value');
+
+            // Calculate inflation-adjusted total
+            $inflationAdjustedTotal = $contracts->sum(function ($contract) {
+                return CurrencyFormatter::calculateInflationAdjusted(
+                    $contract->total_contract_value,
+                    $contract->contract_year
+                );
+            });
+
+            return [
+                'total_contracts' => $totalContracts,
+                'total_value' => $totalValue,
+                'inflation_adjusted_total' => CurrencyFormatter::format($inflationAdjustedTotal),
+            ];
+        });
+
+        return response()->json($historicalData);
+    }
+
+    public function vendorHistoricalTotals(string $vendor): JsonResponse
+    {
+        $decodedVendor = urldecode($vendor);
+
+        $cacheKey = "vendor_historical_totals_{$decodedVendor}";
+
+        $historicalData = Cache::remember($cacheKey, 1800, function () use ($decodedVendor) {
+            // Get all contracts for this vendor across all years
+            $contracts = ProcurementContract::where('vendor_name', $decodedVendor)
+                ->whereNotNull('total_contract_value')
+                ->select('total_contract_value', 'contract_year')
+                ->get();
+
+            $totalContracts = $contracts->count();
+            $totalValue = $contracts->sum('total_contract_value');
+
+            // Calculate inflation-adjusted total
+            $inflationAdjustedTotal = $contracts->sum(function ($contract) {
+                return CurrencyFormatter::calculateInflationAdjusted(
+                    $contract->total_contract_value,
+                    $contract->contract_year
+                );
+            });
+
+            return [
+                'total_contracts' => $totalContracts,
+                'total_value' => $totalValue,
+                'inflation_adjusted_total' => CurrencyFormatter::format($inflationAdjustedTotal),
+            ];
+        });
+
+        return response()->json($historicalData);
+    }
+
+    public function dashboardHistoricalTotals(): JsonResponse
+    {
+        $cacheKey = "dashboard_historical_totals";
+
+        $historicalData = Cache::remember($cacheKey, 1800, function () {
+            // Get all contracts across all vendors and organizations
+            $contracts = ProcurementContract::whereNotNull('total_contract_value')
+                ->select('total_contract_value', 'contract_year')
+                ->get();
+
+            $totalContracts = $contracts->count();
+            $totalValue = $contracts->sum('total_contract_value');
+
+            // Calculate inflation-adjusted total
+            $inflationAdjustedTotal = $contracts->sum(function ($contract) {
+                return CurrencyFormatter::calculateInflationAdjusted(
+                    $contract->total_contract_value,
+                    $contract->contract_year
+                );
+            });
+
+            return [
+                'total_contracts' => $totalContracts,
+                'total_value' => $totalValue,
+                'inflation_adjusted_total' => CurrencyFormatter::format($inflationAdjustedTotal),
+            ];
+        });
+
+        return response()->json($historicalData);
     }
 }

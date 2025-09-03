@@ -4,14 +4,15 @@
 
 @section('content')
     <!-- Hero Section -->
-    <div class="page-header animate-slide-up">
+    <div class="page-header z-4 animate-slide-up">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-5xl md:text-6xl font-bold font-heading text-neutral-900 mb-6">
                 <span class="gradient-text">Government</span><br>
                 <span class="text-neutral-900">Contracts</span>
                 <div class="inline-flex items-center mt-2">
                     <span class="gradient-text mr-4">Canada</span>
-                    <div class="w-8 h-5 rounded-sm shadow-soft bg-gradient-to-r from-red-500 via-white to-red-500 relative overflow-hidden">
+                    <div
+                        class="w-8 h-5 rounded-sm shadow-soft bg-gradient-to-r from-red-500 via-white to-red-500 relative overflow-hidden">
                         <div class="absolute inset-y-0 left-0 w-1/3 bg-red-500"></div>
                         <div class="absolute inset-y-0 right-0 w-1/3 bg-red-500"></div>
                         <div class="absolute inset-y-0 left-1/3 right-1/3 bg-white flex items-center justify-center">
@@ -30,7 +31,8 @@
                     <i class="fas fa-search mr-2"></i>
                     Explore Contracts
                 </a>
-                <a href="{{ route('organizations.index') }}" class="btn-secondary inline-flex items-center justify-center">
+                <a href="{{ route('organizations.index') }}"
+                   class="btn-secondary inline-flex items-center justify-center">
                     <i class="fas fa-building-columns mr-2"></i>
                     View Organizations
                 </a>
@@ -38,34 +40,34 @@
         </div>
     </div>
     <!-- Government Spending Trends Chart -->
-    <div class="card-featured mb-20">
-        <div class="mb-8 text-center">
-            <h2 class="section-title">
-                <i class="fas fa-chart-line text-primary-600 mr-3"></i>
-                Contract Award Trends
-            </h2>
-            <p class="section-subtitle mx-auto">
-                View announced government contract values across multiple years.
-            </p>
-        </div>
-        <div class="relative bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-6" style="height: 450px;">
-            <canvas id="government-spending-chart" class="w-full h-full"></canvas>
+    <div class="relative bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-6" style="height: 450px;">
+        <canvas id="government-spending-chart" class="w-full h-full"></canvas>
 
-            <!-- Loading state -->
-            <div id="gov-chart-loading"
-                 class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary-200 border-t-primary-600 mx-auto mb-4"></div>
-                    <p class="text-neutral-600 font-medium">Loading spending trends...</p>
-                </div>
+        <!-- Loading state -->
+        <div id="gov-chart-loading"
+             class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
+            <div class="text-center">
+                <div
+                    class="animate-spin rounded-full h-10 w-10 border-4 border-primary-200 border-t-primary-600 mx-auto mb-4"></div>
+                <p class="text-neutral-600 font-medium">Loading spending trends...</p>
             </div>
         </div>
+    </div>
+    <div class="mb-8 text-center">
+        <h2 class="section-title">
+            <i class="fas fa-chart-line text-primary-600 mr-3"></i>
+            Contract Award Trends
+        </h2>
+        <p class="section-subtitle mx-auto">
+            View announced government contract values across multiple years.
+        </p>
     </div>
     <!-- Year Filter - Primary Feature -->
     <div class="text-center mb-16">
         <div class="card-featured max-w-3xl mx-auto">
             <div class="flex items-center justify-center mb-6">
-                <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl shadow-medium mr-4">
+                <div
+                    class="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl shadow-medium mr-4">
                     <i class="fas fa-calendar-alt text-xl text-white"></i>
                 </div>
                 <h2 class="section-title mb-0">{{ __('app.filter_by_year') }}</h2>
@@ -74,7 +76,8 @@
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <div class="flex items-center gap-4">
-                    <label for="year" class="text-lg font-semibold text-neutral-700 whitespace-nowrap">{{ __('app.year_label') }}</label>
+                    <label for="year"
+                           class="text-lg font-semibold text-neutral-700 whitespace-nowrap">{{ __('app.year_label') }}</label>
                     <div class="relative">
                         <select id="year"
                                 class="year-selector px-6 py-4 text-xl font-bold border-2 border-neutral-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white transition-all duration-300 shadow-soft hover:shadow-medium min-w-[120px]">
@@ -83,8 +86,10 @@
                             @endforeach
                         </select>
                         <!-- Loading spinner overlay -->
-                        <div id="year-loading" class="absolute inset-0 bg-white bg-opacity-95 rounded-xl items-center justify-center hidden">
-                            <div class="animate-spin rounded-full h-6 w-6 border-4 border-primary-200 border-t-primary-600"></div>
+                        <div id="year-loading"
+                             class="absolute inset-0 bg-white bg-opacity-95 rounded-xl items-center justify-center hidden">
+                            <div
+                                class="animate-spin rounded-full h-6 w-6 border-4 border-primary-200 border-t-primary-600"></div>
                         </div>
                     </div>
                 </div>
@@ -92,7 +97,8 @@
 
             <div class="mt-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl">
                 <span id="year-status-text" class="text-neutral-700 font-medium">
-                    {{ __('app.currently_viewing') }} <span class="font-bold text-primary-700" id="current-year-display"></span> {{ __('app.procurement_data') }}
+                    {{ __('app.currently_viewing') }} <span class="font-bold text-primary-700"
+                                                            id="current-year-display"></span> {{ __('app.procurement_data') }}
                 </span>
                 <span id="year-loading-text" class="hidden text-primary-700 font-medium">
                     <i class="fas fa-spinner fa-spin mr-2"></i>
@@ -110,10 +116,11 @@
                 {{ __('app.year_statistics') }} <span class="pie-chart-year-label gradient-text font-bold">2025</span>
             </h2>
             <p class="section-subtitle mx-auto">
-                Contract announcements for <span class="pie-chart-year-label">2025</span> - breakdown by organization and key metrics.
+                Contract announcements for <span class="pie-chart-year-label">2025</span> - breakdown by organization
+                and key metrics.
             </p>
         </div>
-        
+
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center">
             <!-- Pie Chart -->
             <div class="relative">
@@ -124,7 +131,8 @@
                         <div id="pie-chart-loading"
                              class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
                             <div class="text-center">
-                                <div class="animate-spin rounded-full h-10 w-10 border-4 border-secondary-200 border-t-secondary-600 mx-auto mb-4"></div>
+                                <div
+                                    class="animate-spin rounded-full h-10 w-10 border-4 border-secondary-200 border-t-secondary-600 mx-auto mb-4"></div>
                                 <p class="text-neutral-600 font-medium">Loading spending distribution...</p>
                             </div>
                         </div>
@@ -150,7 +158,7 @@
                 See which vendors and organizations receive the most announced government contracts by volume and value.
             </p>
         </div>
-        
+
         <!-- Vendor Leaderboards -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12" id="vendor-leaderboards">
             <div class="card animate-pulse">
@@ -365,9 +373,9 @@
                             data: data.spending,
                             borderColor: 'rgb(59, 130, 246)',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 3,
+                            borderWidth: 5,
                             fill: true,
-                            tension: 0.4,
+                            tension: 0.6,
                             pointBackgroundColor: 'rgb(59, 130, 246)',
                             pointBorderColor: 'white',
                             pointBorderWidth: 2,
@@ -422,25 +430,22 @@
                         scales: {
                             x: {
                                 title: {
-                                    display: true,
-                                    text: 'Year',
-                                    font: {
-                                        size: 12,
-                                        weight: 'bold'
-                                    }
+                                    display: false,
                                 },
                                 grid: {
                                     color: 'rgba(156, 163, 175, 0.2)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 23,
+                                        weight: 'bold'
+                                    }
                                 }
                             },
                             y: {
                                 title: {
-                                    display: true,
-                                    text: 'Total Government Spending',
-                                    font: {
-                                        size: 12,
-                                        weight: 'bold'
-                                    }
+                                    display: false,
+
                                 },
                                 grid: {
                                     color: 'rgba(156, 163, 175, 0.2)'
@@ -455,6 +460,10 @@
                                             return `$${(value / 1000).toFixed(1)}K`;
                                         }
                                         return `$${value}`;
+                                    },
+                                    font: {
+                                        size: 22,
+                                        weight: 'bold'
                                     }
                                 }
                             }

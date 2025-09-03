@@ -22,24 +22,15 @@
         </p>
     </div>
 
-    <!-- Revenue Over Time Chart -->
-    <div class="card mb-16">
-        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
-            <i class="fas fa-chart-line text-2xl text-blue-500 mr-3"></i>
-            <h3 class="text-xl font-semibold text-gray-800">{{ __('app.revenue_of_contracts') }}</h3>
-        </div>
-        <div class="relative" style="height: 400px;">
-            <canvas id="revenue-chart" class="w-full h-full"></canvas>
-
-            <!-- Loading state -->
-            <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                    <p class="text-sm text-gray-600">Loading revenue data...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Historical Vendor Overview & Revenue Chart -->
+    <x-historical-overview-with-chart
+        :title="__('app.historical_vendor_totals')"
+        :description="'Complete government contract history and revenue trends for ' . $decodedVendor"
+        :chartTitle="__('app.revenue_of_contracts')"
+        chartId="revenue-chart"
+        chartLoadingId="chart-loading"
+        totalValueId="vendor-total-inflation-adjusted-value"
+        totalCountId="vendor-total-contracts-count" />
 
     <!-- Year Filter -->
     <div class="text-center mb-10">
@@ -527,8 +518,40 @@
             const currentYear = YearState.get();
             loadVendorData(currentYear);
 
-            // Load revenue chart (independent of year selection)
+            // Load vendor historical totals (all years combined)
+            function loadVendorHistoricalTotals() {
+                fetch(`/ajax/vendor/${vendor}/historical-totals`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateVendorHistoricalTotals(data);
+                    })
+                    .catch(error => {
+                        console.error('Error loading vendor historical totals:', error);
+                        // Show error state
+                        document.getElementById('vendor-total-inflation-adjusted-value').innerHTML = 
+                            '<span class="text-red-500">Error loading data</span>';
+                        document.getElementById('vendor-total-contracts-count').innerHTML = 
+                            '<span class="text-red-500">Error loading data</span>';
+                    });
+            }
+
+            function updateVendorHistoricalTotals(data) {
+                // Update inflation-adjusted total value
+                const totalValueEl = document.getElementById('vendor-total-inflation-adjusted-value');
+                if (totalValueEl && data.inflation_adjusted_total) {
+                    totalValueEl.textContent = data.inflation_adjusted_total;
+                }
+
+                // Update total contracts count
+                const totalContractsEl = document.getElementById('vendor-total-contracts-count');
+                if (totalContractsEl && data.total_contracts) {
+                    totalContractsEl.textContent = data.total_contracts.toLocaleString();
+                }
+            }
+
+            // Load revenue chart and historical totals (independent of year selection)
             loadRevenueChart();
+            loadVendorHistoricalTotals();
         });
     </script>
 @endsection

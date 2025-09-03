@@ -14,7 +14,8 @@
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div>
             <div class="text-right">
                 <div class="text-lg font-bold text-purple-600">
                     @if($minister->total_value >= 1000000000)
@@ -29,17 +30,16 @@
                 </div>
                 <div class="text-xs text-gray-500">total value</div>
             </div>
-        </div>
-
-        <div class="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-            <a href="{{ route('organization.detail', ['organization' => urlencode($minister->organization)]) }}" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-1 rounded-full font-medium transition-colors">
-                <i class="fas fa-building-columns mr-1"></i>View Organization
-            </a>
-            @if(isset($vendorName))
-            <a href="{{ route('vendor.organization.contracts', ['vendor' => rawurlencode($vendorName), 'organization' => urlencode($minister->organization)]) }}" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-1 rounded-full font-medium transition-colors">
-                <i class="fas fa-handshake mr-1"></i>View Partnership
-            </a>
-            @endif
+            <div class="flex gap-2 pt-3">
+                <a href="{{ route('organization.detail', ['organization' => urlencode($minister->organization)]) }}" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-1 rounded-full font-medium transition-colors">
+                    <i class="fas fa-building-columns mr-1"></i>View Organization
+                </a>
+                @if(isset($vendorName))
+                    <a href="{{ route('vendor.organization.contracts', ['vendor' => rawurlencode($vendorName), 'organization' => urlencode($minister->organization)]) }}" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-1 rounded-full font-medium transition-colors">
+                        <i class="fas fa-handshake mr-1"></i>View Partnership
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 @endforeach
