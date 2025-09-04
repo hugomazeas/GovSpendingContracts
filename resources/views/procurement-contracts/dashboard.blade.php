@@ -27,7 +27,7 @@
                 {{ __('app.dashboard_subtitle') }}
             </p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#data-table" class="btn-primary inline-flex items-center justify-center">
+                <a href="{{ route('contracts.index') }}" class="btn-primary inline-flex items-center justify-center">
                     <i class="fas fa-search mr-2"></i>
                     Explore Contracts
                 </a>
@@ -38,6 +38,15 @@
                 </a>
             </div>
         </div>
+    </div>
+    <div class="text-center">
+        <h2 class="section-title">
+            <i class="fas fa-chart-line text-primary-600 mr-3"></i>
+            Contract Award Trends
+        </h2>
+        <p class="section-subtitle mx-auto">
+            View announced government contract values across multiple years.
+        </p>
     </div>
     <!-- Government Spending Trends Chart -->
     <div class="relative bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-6" style="height: 450px;">
@@ -52,15 +61,6 @@
                 <p class="text-neutral-600 font-medium">Loading spending trends...</p>
             </div>
         </div>
-    </div>
-    <div class="mb-8 text-center">
-        <h2 class="section-title">
-            <i class="fas fa-chart-line text-primary-600 mr-3"></i>
-            Contract Award Trends
-        </h2>
-        <p class="section-subtitle mx-auto">
-            View announced government contract values across multiple years.
-        </p>
     </div>
     <!-- Year Filter - Primary Feature -->
     <div class="text-center mb-16">
@@ -155,7 +155,7 @@
                 Top Contract Recipients & Organizations
             </h2>
             <p class="section-subtitle mx-auto">
-                See which vendors and organizations receive the most announced government contracts by volume and value.
+                See which vendors and organizations receive the most announced government contracts by volume and value for the year <span class="pie-chart-year-label">2025</span>.
             </p>
         </div>
 
@@ -204,9 +204,9 @@
             </div>
         </div>
 
-        <!-- Organization Leaderboard -->
-        <div class="flex justify-center">
-            <div class="w-full max-w-5xl" id="organization-leaderboard">
+        <!-- Organization and Vendor Countries Leaderboards -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div class="w-full" id="organization-leaderboard">
                 <div class="card animate-pulse">
                     <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
                         <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
@@ -228,24 +228,32 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="w-full" id="vendor-countries-leaderboard">
+                <div class="card animate-pulse">
+                    <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
+                        <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
+                        <div class="h-6 bg-neutral-300 rounded w-64"></div>
+                    </div>
+                    <div class="space-y-4">
+                        @for($i = 0; $i < 5; $i++)
+                            <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-8 h-8 bg-neutral-300 rounded-full flex-shrink-0"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-4 bg-neutral-300 rounded w-32"></div>
+                                        <div class="h-3 bg-neutral-300 rounded w-20"></div>
+                                    </div>
+                                </div>
+                                <div class="h-6 bg-neutral-300 rounded w-16 flex-shrink-0"></div>
+                            </div>
+                        @endfor
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Public Transparency DataTable -->
-    <div class="mb-16" id="data-table">
-        <div class="text-center mb-12">
-            <h2 class="section-title">
-                <i class="fas fa-table text-primary-600 mr-3"></i>
-                Contract Announcements Database
-            </h2>
-            <p class="section-subtitle mx-auto">
-                Search and explore the government's announced procurement contracts with detailed information.
-            </p>
-        </div>
-        <div class="card-featured">
-            <x-transparency-datatable ajax-url="{{ route('contracts.data') }}"/>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -327,11 +335,9 @@
                     loadOrganizationsPieChart(year),
                     loadStatsGrid(year),
                     loadVendorLeaderboards(year),
-                    loadOrganizationLeaderboard(year)
+                    loadOrganizationLeaderboard(year),
+                    loadVendorCountriesLeaderboard(year)
                 ];
-
-                // Update DataTable URL if it exists
-                updateDataTableUrl(year);
 
                 // Wait for all loading to complete
                 Promise.allSettled(loadingPromises).finally(() => {
@@ -621,13 +627,19 @@
                     });
             }
 
-            function updateDataTableUrl(year) {
-                // Update DataTable AJAX URL if the component exists
-                if (window.dataTable && window.dataTable.ajax) {
-                    const newUrl = `{{ route('contracts.data') }}?year=${year}`;
-                    window.dataTable.ajax.url(newUrl).load();
-                }
+            function loadVendorCountriesLeaderboard(year) {
+                return fetch(`{{ route('ajax.dashboard.vendor-countries-leaderboard') }}?year=${year}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('vendor-countries-leaderboard').innerHTML = data.html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading vendor countries leaderboard:', error);
+                        document.getElementById('vendor-countries-leaderboard').innerHTML =
+                            '<div class="text-center py-8 text-red-600">Error loading vendor countries data</div>';
+                    });
             }
+
 
             // Listen for year changes
             YearState.addListener(function (year) {

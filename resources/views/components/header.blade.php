@@ -24,12 +24,16 @@
                         <i class="fas fa-home text-sm"></i>
                         <span>{{ __('app.dashboard') }}</span>
                     </a>
+                    <a href="{{ route('contracts.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                        <i class="fas fa-file-contract text-sm"></i>
+                        <span>{{ __('app.contracts_nav') }}</span>
+                    </a>
                     <a href="{{ route('organizations.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
                         <i class="fas fa-building-columns text-sm"></i>
                         <span>{{ __('app.organizations') }}</span>
                     </a>
                 </nav>
-                
+
                 <!-- Language Switcher -->
                 @php
                     $languages = \App\Helpers\LanguageHelper::getSupportedLanguages();
@@ -44,7 +48,7 @@
                     <div id="language-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-strong border border-neutral-200 opacity-0 invisible transition-all duration-300 z-50">
                         <div class="py-2">
                             @foreach($languages as $locale => $language)
-                                <a href="{{ route('language.switch', $locale) }}" 
+                                <a href="{{ route('language.switch', $locale) }}"
                                    class="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors rounded-lg mx-2 @if(app()->getLocale() === $locale) bg-primary-50 text-primary-700 font-semibold @endif">
                                     {{ $language['native'] }}
                                 </a>
@@ -67,6 +71,10 @@
                     <i class="fas fa-home text-sm w-5"></i>
                     <span>{{ __('app.dashboard') }}</span>
                 </a>
+                <a href="{{ route('contracts.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
+                    <i class="fas fa-file-contract text-sm w-5"></i>
+                    <span>{{ __('app.contracts') }}</span>
+                </a>
                 <a href="{{ route('organizations.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
                     <i class="fas fa-building-columns text-sm w-5"></i>
                     <span>{{ __('app.organizations') }}</span>
@@ -76,7 +84,7 @@
                 <p class="text-neutral-500 text-sm mb-3 px-4 font-medium">{{ __('app.switch_language') }}:</p>
                 <div class="space-y-1">
                     @foreach($languages as $locale => $language)
-                        <a href="{{ route('language.switch', $locale) }}" 
+                        <a href="{{ route('language.switch', $locale) }}"
                            class="flex items-center space-x-3 px-4 py-2 rounded-lg text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 @if(app()->getLocale() === $locale) bg-primary-50 text-primary-700 font-semibold @endif">
                             <i class="fas fa-globe text-sm w-5"></i>
                             <span>{{ $language['native'] }}</span>
@@ -104,7 +112,7 @@ function toggleLanguageDropdown() {
 document.addEventListener('click', function(event) {
     const dropdown = document.getElementById('language-dropdown');
     const button = event.target.closest('button[onclick="toggleLanguageDropdown()"]');
-    
+
     if (!button && !dropdown.contains(event.target)) {
         dropdown.classList.add('opacity-0');
         dropdown.classList.add('invisible');

@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 Route::get('/', [ProcurementContractController::class, 'index'])->name('dashboard');
+Route::get('/contracts', [ProcurementContractController::class, 'contracts'])->name('contracts.index');
 Route::get('/contracts/data', [ProcurementContractController::class, 'data'])->name('contracts.data');
+Route::get('/contract/{contract}', [ProcurementContractController::class, 'show'])->name('contract.detail');
 
 // Organization routes
 Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
@@ -40,6 +42,7 @@ Route::prefix('ajax')->group(function () {
     Route::get('/dashboard/organizations-pie-chart', [DashboardController::class, 'organizationsPieChart'])->name('ajax.dashboard.organizations-pie-chart');
     Route::get('/dashboard/vendor-leaderboards', [DashboardController::class, 'vendorLeaderboards'])->name('ajax.dashboard.vendor-leaderboards');
     Route::get('/dashboard/organization-leaderboard', [DashboardController::class, 'organizationLeaderboard'])->name('ajax.dashboard.organization-leaderboard');
+    Route::get('/dashboard/vendor-countries-leaderboard', [DashboardController::class, 'vendorCountriesLeaderboard'])->name('ajax.dashboard.vendor-countries-leaderboard');
     Route::get('/dashboard/historical-totals', [DashboardController::class, 'dashboardHistoricalTotals'])->name('ajax.dashboard.historical-totals');
     Route::get('/organization/{organization}/stats', [DashboardController::class, 'organizationStats'])->name('ajax.organization.stats');
     Route::get('/organization/{organization}/spending-chart', [DashboardController::class, 'organizationSpendingChart'])->name('ajax.organization.spending-chart');

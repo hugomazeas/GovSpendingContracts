@@ -94,6 +94,21 @@ $(document).ready(function() {
             $('.dataTables_info, .dataTables_paginate').addClass('mt-4');
             $('.dataTables_filter input').addClass('px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500');
             $('.dataTables_length select').addClass('px-3 py-1 border border-gray-300 rounded-lg');
+            
+            // Make table rows clickable
+            $('#vendor-contracts-table tbody tr').each(function() {
+                const $row = $(this);
+                const data = window.vendorContractsTable.row($row).data();
+                if (data && data.id) {
+                    $row.addClass('cursor-pointer hover:bg-primary-50 transition-colors');
+                    $row.off('click.contract-detail').on('click.contract-detail', function(e) {
+                        // Don't trigger if clicking on a link
+                        if ($(e.target).closest('a').length === 0) {
+                            window.location.href = '/contract/' + data.id;
+                        }
+                    });
+                }
+            });
         }
     });
 });
@@ -117,6 +132,10 @@ $(document).ready(function() {
 
     table.dataTable tbody tr:hover {
         @apply bg-blue-50;
+    }
+    
+    table.dataTable tbody tr.cursor-pointer:hover {
+        @apply bg-primary-50 shadow-sm;
     }
 </style>
 @endpush

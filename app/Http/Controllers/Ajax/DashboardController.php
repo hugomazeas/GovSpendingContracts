@@ -79,6 +79,23 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function vendorCountriesLeaderboard(Request $request): JsonResponse
+    {
+        $selectedYear = $request->get('year', date('Y'));
+
+        $cacheKey = "vendor_countries_leaderboard_{$selectedYear}";
+
+        $countries = Cache::remember($cacheKey, 300, function () use ($selectedYear) {
+            return $this->analyticsService->getTopVendorCountriesByValue($selectedYear);
+        });
+
+        return response()->json([
+            'html' => view('components.vendor-countries-leaderboard', [
+                'countries' => $countries,
+            ])->render(),
+        ]);
+    }
+
     public function organizationDetails(Request $request, string $organization): JsonResponse
     {
         $decodedOrganization = urldecode($organization);

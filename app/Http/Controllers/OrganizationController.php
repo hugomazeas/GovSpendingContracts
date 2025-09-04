@@ -240,6 +240,7 @@ class OrganizationController extends Controller
 
         $data = $contracts->map(function ($contract) use ($decodedOrganization) {
             return [
+                'id' => $contract->id,
                 'vendor_name' => $contract->vendor_name ?
                     '<div class="flex flex-col gap-1"><a href="'.route('vendor.detail', ['vendor' => urlencode($contract->vendor_name)]).'" class="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">'.e($contract->vendor_name).'</a><a href="'.route('vendor.organization.contracts', ['vendor' => urlencode($contract->vendor_name), 'organization' => urlencode($decodedOrganization)]).'" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-medium transition-colors"><i class="fas fa-handshake mr-1"></i>View partnership</a></div>' :
                     '-',

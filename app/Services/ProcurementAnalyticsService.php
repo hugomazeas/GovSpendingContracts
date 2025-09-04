@@ -179,6 +179,19 @@ class ProcurementAnalyticsService
             ->get();
     }
 
+    public function getTopVendorCountriesByValue(int $year): Collection
+    {
+        return ProcurementContract::selectRaw('country_of_vendor, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
+            ->where('contract_year', $year)
+            ->whereNotNull('country_of_vendor')
+            ->where('country_of_vendor', '!=', '')
+            ->whereNotNull('total_contract_value')
+            ->groupBy('country_of_vendor')
+            ->orderByDesc('total_value')
+            ->limit(5)
+            ->get();
+    }
+
     // Available Years Methods
     public function getAvailableYears(): Collection
     {

@@ -33,6 +33,20 @@ class ProcurementContractController extends Controller
         ));
     }
 
+    public function contracts(Request $request): View
+    {
+        $availableYears = Cache::remember('available_years', 3600, function () {
+            return $this->analyticsService->getAvailableYears();
+        });
+
+        return view('procurement-contracts.index', compact('availableYears'));
+    }
+
+    public function show(ProcurementContract $contract): View
+    {
+        return view('procurement-contracts.show', compact('contract'));
+    }
+
     public function data(Request $request): JsonResponse
     {
         $query = ProcurementContract::query();
@@ -81,6 +95,7 @@ class ProcurementContractController extends Controller
 
         $data = $contracts->map(function ($contract) {
             return [
+                'id' => $contract->id,
                 'reference_number' => $contract->reference_number,
                 'vendor_name' => $contract->vendor_name ?
                     '<a href="'.route('vendor.detail', rawurlencode($contract->vendor_name)).'" class="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">'.e($contract->vendor_name).'</a>' :

@@ -6,6 +6,7 @@ return [
     'site_description' => 'Ce que le gouvernement annonce',
     'dashboard' => 'Aperçu',
     'organizations' => 'Organisations',
+    'contract_nav' => 'Contrats',
     'analytics' => 'Analytiques',
     'about' => 'À Propos',
 

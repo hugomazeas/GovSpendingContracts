@@ -97,6 +97,7 @@ class VendorController extends Controller
 
         $data = $contracts->map(function ($contract) use ($decodedVendor) {
             return [
+                'id' => $contract->id,
                 'reference_number' => $contract->reference_number,
                 'contract_date' => $contract->contract_date?->format('Y-m-d'),
                 'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
@@ -196,6 +197,7 @@ class VendorController extends Controller
 
         $data = $contracts->map(function ($contract) {
             return [
+                'id' => $contract->id,
                 'reference_number' => $contract->reference_number,
                 'contract_date' => $contract->contract_date?->format('Y-m-d'),
                 'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
