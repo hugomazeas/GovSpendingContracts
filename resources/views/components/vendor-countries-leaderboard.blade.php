@@ -40,7 +40,7 @@
                             ${{ number_format($country->total_value) }}
                         @endif
                     </div>
-                    <div class="text-xs text-gray-500">total value</div>
+                    <div class="text-xs text-gray-500">{{ __('app.total_value_label') }}</div>
                 </div>
             </div>
         @endforeach

@@ -19,7 +19,7 @@
                         </div>
                         <div class="text-sm text-gray-600">
                             @if($metric === 'contracts')
-                                Total Value: ${{ number_format($vendor->total_value, 0) }}
+                                {{ __('app.total_value') }}: ${{ number_format($vendor->total_value, 0) }}
                             @else
                                 {{ number_format($vendor->contract_count) }} contracts
                             @endif
@@ -38,7 +38,7 @@
                             <div class="text-lg font-bold text-green-600">
                                 ${{ number_format($vendor->total_value, 0) }}
                             </div>
-                            <div class="text-xs text-gray-500">total value</div>
+                            <div class="text-xs text-gray-500">{{ __('app.total_value_label') }}</div>
                         @endif
                     </div>
                     <i class="fas fa-arrow-right text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity ml-2"></i>

@@ -67,10 +67,10 @@
         <div class="text-center mb-12">
             <h2 class="section-title">
                 <i class="fas fa-table text-primary-600 mr-3"></i>
-                Contract Announcements Database
+                {{ __('app.contract_announcements_database') }}
             </h2>
             <p class="section-subtitle mx-auto">
-                Browse all government contract announcements with advanced search and filtering capabilities.
+                {{ __('app.browse_all_contracts') }}
             </p>
         </div>
         <div class="card-featured">

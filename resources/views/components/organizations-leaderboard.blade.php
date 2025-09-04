@@ -32,7 +32,7 @@
                                 ${{ number_format($org->total_spending / 1000000, 1) }}M
                             @endif
                         </div>
-                        <div class="text-xs text-gray-500">total spent</div>
+                        <div class="text-xs text-gray-500">{{ __('app.total_spent_label') }}</div>
                     </div>
                     <i class="fas fa-arrow-right text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity ml-2"></i>
                 </div>

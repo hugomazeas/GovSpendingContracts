@@ -28,7 +28,7 @@
                         ${{ number_format($minister->total_value, 0) }}
                     @endif
                 </div>
-                <div class="text-xs text-gray-500">total value</div>
+                <div class="text-xs text-gray-500">{{ __('app.total_value_label') }}</div>
             </div>
             <div class="flex gap-2 pt-3">
                 <a href="{{ route('organization.detail', ['organization' => urlencode($minister->organization)]) }}" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-1 rounded-full font-medium transition-colors">

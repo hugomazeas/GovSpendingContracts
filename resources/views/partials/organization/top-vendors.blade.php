@@ -19,7 +19,7 @@
                 <div class="text-lg font-bold text-green-600">
                     ${{ number_format($vendor->total_value, 0) }}
                 </div>
-                <div class="text-xs text-gray-500">total value</div>
+                <div class="text-xs text-gray-500">{{ __('app.total_value_label') }}</div>
             </div>
         </div>
         

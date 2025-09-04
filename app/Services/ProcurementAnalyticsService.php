@@ -77,7 +77,7 @@ class ProcurementAnalyticsService
             ->whereNotNull('total_contract_value')
             ->orderByDesc('total_contract_value')
             ->limit(20)
-            ->get(['vendor_name', 'total_contract_value', 'contract_date', 'description_of_work_english', 'reference_number']);
+            ->get(['id', 'vendor_name', 'total_contract_value', 'contract_date', 'description_of_work_english', 'reference_number']);
     }
 
     public function getContractsByYearForOrganization(string $organization): Collection
