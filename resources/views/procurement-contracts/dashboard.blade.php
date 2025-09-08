@@ -4,11 +4,11 @@
 
 @section('content')
     <!-- Hero Section -->
-    <div class="page-header z-4 animate-slide-up">
+    <div class="page-header z-4 animate-slide-up dark:bg-neutral-900">
         <div class="max-w-4xl mx-auto">
-            <h1 class="text-5xl md:text-6xl font-bold font-heading text-neutral-900 mb-6">
+            <h1 class="text-5xl md:text-6xl font-bold font-heading text-neutral-900 dark:text-neutral-100 mb-6">
                 <span class="gradient-text">Government</span><br>
-                <span class="text-neutral-900">Contracts</span>
+                <span class="text-neutral-900 dark:text-neutral-100">Contracts</span>
                 <div class="inline-flex items-center mt-2">
                     <span class="gradient-text mr-4">Canada</span>
                     <div
@@ -23,7 +23,7 @@
                     </div>
                 </div>
             </h1>
-            <p class="text-xl md:text-2xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
+            <p class="text-xl md:text-2xl text-neutral-600 dark:text-neutral-300 leading-relaxed max-w-3xl mx-auto">
                 {{ __('app.dashboard_subtitle') }}
             </p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -39,55 +39,55 @@
             </div>
         </div>
     </div>
-    <div class="text-center">
-        <h2 class="section-title">
+    <div class="text-center dark:bg-neutral-900">
+        <h2 class="section-title dark:text-neutral-100">
             <i class="fas fa-chart-line text-primary-600 mr-3"></i>
             Contract Award Trends
         </h2>
-        <p class="section-subtitle mx-auto">
+        <p class="section-subtitle mx-auto dark:text-neutral-300">
             View announced government contract values across multiple years.
         </p>
     </div>
     <!-- Government Spending Trends Chart -->
-    <div class="relative bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-6" style="height: 450px;">
+    <div class="relative bg-gradient-to-br from-neutral-50 to-white dark:from-neutral-800 dark:to-neutral-900 rounded-2xl p-6" style="height: 450px;">
         <canvas id="government-spending-chart" class="w-full h-full"></canvas>
 
         <!-- Loading state -->
         <div id="gov-chart-loading"
-             class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
+             class="absolute inset-0 flex items-center justify-center bg-white dark:bg-neutral-800 bg-opacity-95 rounded-2xl">
             <div class="text-center">
                 <div
                     class="animate-spin rounded-full h-10 w-10 border-4 border-primary-200 border-t-primary-600 mx-auto mb-4"></div>
-                <p class="text-neutral-600 font-medium">Loading spending trends...</p>
+                <p class="text-neutral-600 dark:text-neutral-300 font-medium">Loading spending trends...</p>
             </div>
         </div>
     </div>
     <!-- Year Filter - Primary Feature -->
-    <div class="text-center mb-16">
+    <div class="text-center mb-16 dark:bg-neutral-900">
         <div class="card-featured max-w-3xl mx-auto">
             <div class="flex items-center justify-center mb-6">
                 <div
                     class="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl shadow-medium mr-4">
                     <i class="fas fa-calendar-alt text-xl text-white"></i>
                 </div>
-                <h2 class="section-title mb-0">{{ __('app.filter_by_year') }}</h2>
+                <h2 class="section-title mb-0 dark:text-neutral-100">{{ __('app.filter_by_year') }}</h2>
             </div>
-            <p class="text-neutral-600 mb-8 text-lg">{{ __('app.filter_description') }}</p>
+            <p class="text-neutral-600 dark:text-neutral-300 mb-8 text-lg">{{ __('app.filter_description') }}</p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <div class="flex items-center gap-4">
                     <label for="year"
-                           class="text-lg font-semibold text-neutral-700 whitespace-nowrap">{{ __('app.year_label') }}</label>
+                           class="text-lg font-semibold text-neutral-700 dark:text-neutral-300 whitespace-nowrap">{{ __('app.year_label') }}</label>
                     <div class="relative">
                         <select id="year"
-                                class="year-selector px-6 py-4 text-xl font-bold border-2 border-neutral-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white transition-all duration-300 shadow-soft hover:shadow-medium min-w-[120px]">
+                                class="year-selector px-6 py-4 text-xl font-bold border-2 border-neutral-200 dark:border-neutral-600 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 bg-white dark:bg-neutral-800 dark:text-neutral-100 transition-all duration-300 shadow-soft hover:shadow-medium min-w-[120px]">
                             @foreach($availableYears as $year)
                                 <option value="{{ $year }}">{{ $year }}</option>
                             @endforeach
                         </select>
                         <!-- Loading spinner overlay -->
                         <div id="year-loading"
-                             class="absolute inset-0 bg-white bg-opacity-95 rounded-xl items-center justify-center hidden">
+                             class="absolute inset-0 bg-white dark:bg-neutral-800 bg-opacity-95 rounded-xl items-center justify-center hidden">
                             <div
                                 class="animate-spin rounded-full h-6 w-6 border-4 border-primary-200 border-t-primary-600"></div>
                         </div>
@@ -95,12 +95,12 @@
                 </div>
             </div>
 
-            <div class="mt-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl">
-                <span id="year-status-text" class="text-neutral-700 font-medium">
+            <div class="mt-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-neutral-800 dark:to-neutral-700 rounded-xl">
+                <span id="year-status-text" class="text-neutral-700 dark:text-neutral-200 font-medium">
                     {{ __('app.currently_viewing') }} <span class="font-bold text-primary-700"
                                                             id="current-year-display"></span> {{ __('app.procurement_data') }}
                 </span>
-                <span id="year-loading-text" class="hidden text-primary-700 font-medium">
+                <span id="year-loading-text" class="hidden text-primary-700 dark:text-primary-400 font-medium">
                     <i class="fas fa-spinner fa-spin mr-2"></i>
                     {{ __('app.loading_data') }}
                 </span>
@@ -109,13 +109,13 @@
     </div>
 
     <!-- Organization Spending Distribution Section -->
-    <div class="card-featured mb-20">
-        <div class="mb-8 text-center">
-            <h2 class="section-title">
+    <div class="card-featured mb-20 dark:bg-neutral-800">
+        <div class="mb-8 text-center dark:text-neutral-100">
+            <h2 class="section-title dark:text-neutral-100">
                 <i class="fas fa-chart-pie text-secondary-600 mr-3"></i>
                 {{ __('app.year_statistics') }} <span class="pie-chart-year-label gradient-text font-bold">2025</span>
             </h2>
-            <p class="section-subtitle mx-auto">
+            <p class="section-subtitle mx-auto dark:text-neutral-300">
                 Contract announcements for <span class="pie-chart-year-label">2025</span> - breakdown by organization
                 and key metrics.
             </p>
@@ -124,16 +124,16 @@
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center">
             <!-- Pie Chart -->
             <div class="relative">
-                <div class="bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-8 shadow-soft">
+                <div class="bg-gradient-to-br from-neutral-50 to-white dark:from-neutral-700 dark:to-neutral-800 rounded-2xl p-8 shadow-soft">
                     <div class="relative h-80 lg:h-96">
                         <canvas id="organizations-pie-chart" class="w-full h-full"></canvas>
                         <!-- Loading state -->
                         <div id="pie-chart-loading"
-                             class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 rounded-2xl">
+                             class="absolute inset-0 flex items-center justify-center bg-white dark:bg-neutral-800 bg-opacity-95 rounded-2xl">
                             <div class="text-center">
                                 <div
                                     class="animate-spin rounded-full h-10 w-10 border-4 border-secondary-200 border-t-secondary-600 mx-auto mb-4"></div>
-                                <p class="text-neutral-600 font-medium">Loading spending distribution...</p>
+                                <p class="text-neutral-600 dark:text-neutral-300 font-medium">Loading spending distribution...</p>
                             </div>
                         </div>
                     </div>
@@ -148,56 +148,56 @@
     </div>
 
     <!-- Key Insights Section -->
-    <div class="mb-16">
-        <div class="text-center mb-12">
-            <h2 class="section-title">
+    <div class="mb-16 dark:bg-neutral-900">
+        <div class="text-center mb-12 dark:text-neutral-100">
+            <h2 class="section-title dark:text-neutral-100">
                 <i class="fas fa-trophy text-yellow-500 mr-3"></i>
                 Top Contract Recipients & Organizations
             </h2>
-            <p class="section-subtitle mx-auto">
+            <p class="section-subtitle mx-auto dark:text-neutral-300">
                 See which vendors and organizations receive the most announced government contracts by volume and value for the year <span class="pie-chart-year-label">2025</span>.
             </p>
         </div>
 
         <!-- Vendor Leaderboards -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12" id="vendor-leaderboards">
-            <div class="card animate-pulse">
-                <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
-                    <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
-                    <div class="h-6 bg-neutral-300 rounded w-48"></div>
+            <div class="card animate-pulse dark:bg-neutral-800">
+                <div class="flex items-center mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-600">
+                    <div class="w-10 h-10 bg-neutral-300 dark:bg-neutral-600 rounded-xl mr-4"></div>
+                    <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-48"></div>
                 </div>
                 <div class="space-y-4">
                     @for($i = 0; $i < 5; $i++)
-                        <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                        <div class="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-xl">
                             <div class="flex items-center space-x-4">
-                                <div class="w-8 h-8 bg-neutral-300 rounded-full flex-shrink-0"></div>
+                                <div class="w-8 h-8 bg-neutral-300 dark:bg-neutral-600 rounded-full flex-shrink-0"></div>
                                 <div class="space-y-2">
-                                    <div class="h-4 bg-neutral-300 rounded w-32"></div>
-                                    <div class="h-3 bg-neutral-300 rounded w-20"></div>
+                                    <div class="h-4 bg-neutral-300 dark:bg-neutral-600 rounded w-32"></div>
+                                    <div class="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-20"></div>
                                 </div>
                             </div>
-                            <div class="h-6 bg-neutral-300 rounded w-16 flex-shrink-0"></div>
+                            <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-16 flex-shrink-0"></div>
                         </div>
                     @endfor
                 </div>
             </div>
 
-            <div class="card animate-pulse">
-                <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
-                    <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
-                    <div class="h-6 bg-neutral-300 rounded w-48"></div>
+            <div class="card animate-pulse dark:bg-neutral-800">
+                <div class="flex items-center mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-600">
+                    <div class="w-10 h-10 bg-neutral-300 dark:bg-neutral-600 rounded-xl mr-4"></div>
+                    <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-48"></div>
                 </div>
                 <div class="space-y-4">
                     @for($i = 0; $i < 5; $i++)
-                        <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                        <div class="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-xl">
                             <div class="flex items-center space-x-4">
-                                <div class="w-8 h-8 bg-neutral-300 rounded-full flex-shrink-0"></div>
+                                <div class="w-8 h-8 bg-neutral-300 dark:bg-neutral-600 rounded-full flex-shrink-0"></div>
                                 <div class="space-y-2">
-                                    <div class="h-4 bg-neutral-300 rounded w-32"></div>
-                                    <div class="h-3 bg-neutral-300 rounded w-20"></div>
+                                    <div class="h-4 bg-neutral-300 dark:bg-neutral-600 rounded w-32"></div>
+                                    <div class="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-20"></div>
                                 </div>
                             </div>
-                            <div class="h-6 bg-neutral-300 rounded w-16 flex-shrink-0"></div>
+                            <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-16 flex-shrink-0"></div>
                         </div>
                     @endfor
                 </div>
@@ -207,22 +207,22 @@
         <!-- Organization and Vendor Countries Leaderboards -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
             <div class="w-full" id="organization-leaderboard">
-                <div class="card animate-pulse">
-                    <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
-                        <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
-                        <div class="h-6 bg-neutral-300 rounded w-64"></div>
+                <div class="card animate-pulse dark:bg-neutral-800">
+                    <div class="flex items-center mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-600">
+                        <div class="w-10 h-10 bg-neutral-300 dark:bg-neutral-600 rounded-xl mr-4"></div>
+                        <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-64"></div>
                     </div>
                     <div class="space-y-4">
                         @for($i = 0; $i < 8; $i++)
-                            <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                            <div class="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-xl">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-8 bg-neutral-300 rounded flex-shrink-0"></div>
+                                    <div class="w-12 h-8 bg-neutral-300 dark:bg-neutral-600 rounded flex-shrink-0"></div>
                                     <div class="space-y-2">
-                                        <div class="h-4 bg-neutral-300 rounded w-48"></div>
-                                        <div class="h-3 bg-neutral-300 rounded w-24"></div>
+                                        <div class="h-4 bg-neutral-300 dark:bg-neutral-600 rounded w-48"></div>
+                                        <div class="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-24"></div>
                                     </div>
                                 </div>
-                                <div class="h-6 bg-neutral-300 rounded w-20 flex-shrink-0"></div>
+                                <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-20 flex-shrink-0"></div>
                             </div>
                         @endfor
                     </div>
@@ -230,22 +230,22 @@
             </div>
             
             <div class="w-full" id="vendor-countries-leaderboard">
-                <div class="card animate-pulse">
-                    <div class="flex items-center mb-6 pb-4 border-b border-neutral-200">
-                        <div class="w-10 h-10 bg-neutral-300 rounded-xl mr-4"></div>
-                        <div class="h-6 bg-neutral-300 rounded w-64"></div>
+                <div class="card animate-pulse dark:bg-neutral-800">
+                    <div class="flex items-center mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-600">
+                        <div class="w-10 h-10 bg-neutral-300 dark:bg-neutral-600 rounded-xl mr-4"></div>
+                        <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-64"></div>
                     </div>
                     <div class="space-y-4">
                         @for($i = 0; $i < 5; $i++)
-                            <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                            <div class="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-xl">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-8 h-8 bg-neutral-300 rounded-full flex-shrink-0"></div>
+                                    <div class="w-8 h-8 bg-neutral-300 dark:bg-neutral-600 rounded-full flex-shrink-0"></div>
                                     <div class="space-y-2">
-                                        <div class="h-4 bg-neutral-300 rounded w-32"></div>
-                                        <div class="h-3 bg-neutral-300 rounded w-20"></div>
+                                        <div class="h-4 bg-neutral-300 dark:bg-neutral-600 rounded w-32"></div>
+                                        <div class="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-20"></div>
                                     </div>
                                 </div>
-                                <div class="h-6 bg-neutral-300 rounded w-16 flex-shrink-0"></div>
+                                <div class="h-6 bg-neutral-300 dark:bg-neutral-600 rounded w-16 flex-shrink-0"></div>
                             </div>
                         @endfor
                     </div>

@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -111,15 +112,15 @@
             }
             
             .card {
-                @apply bg-white rounded-2xl p-8 shadow-soft border border-neutral-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
+                @apply bg-white dark:bg-neutral-800 rounded-2xl p-8 shadow-soft border border-neutral-100 dark:border-neutral-700 transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
             }
             
             .card-featured {
-                @apply bg-white rounded-2xl p-8 shadow-medium border-2 border-primary-100 transition-all duration-300 hover:shadow-strong hover:-translate-y-2 hover:border-primary-200;
+                @apply bg-white dark:bg-neutral-800 rounded-2xl p-8 shadow-medium border-2 border-primary-100 dark:border-primary-800 transition-all duration-300 hover:shadow-strong hover:-translate-y-2 hover:border-primary-200 dark:hover:border-primary-700;
             }
             
             .stats-card {
-                @apply bg-gradient-to-br from-white to-neutral-50 rounded-2xl p-8 text-center shadow-soft border border-neutral-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:from-primary-50 hover:to-white;
+                @apply bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700 rounded-2xl p-8 text-center shadow-soft border border-neutral-100 dark:border-neutral-700 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:from-primary-50 hover:to-white dark:hover:from-neutral-700 dark:hover:to-neutral-600;
             }
             
             .stats-card-accent {
@@ -127,7 +128,7 @@
             }
             
             .vendor-item {
-                @apply flex items-center justify-between p-6 mb-4 bg-white rounded-xl shadow-soft border border-neutral-100 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:border-primary-200;
+                @apply flex items-center justify-between p-6 mb-4 bg-white dark:bg-neutral-800 rounded-xl shadow-soft border border-neutral-100 dark:border-neutral-700 transition-all duration-300 hover:shadow-medium hover:-translate-y-1 hover:border-primary-200 dark:hover:border-primary-600;
             }
             
             .vendor-item-featured {
@@ -147,11 +148,11 @@
             }
             
             .section-title {
-                @apply text-3xl font-bold font-heading text-neutral-900 mb-6;
+                @apply text-3xl font-bold font-heading text-neutral-900 dark:text-neutral-100 mb-6;
             }
             
             .section-subtitle {
-                @apply text-lg text-neutral-600 mb-8 max-w-2xl;
+                @apply text-lg text-neutral-600 dark:text-neutral-300 mb-8 max-w-2xl;
             }
             
             .page-header {
@@ -166,12 +167,12 @@
     
     @stack('styles')
 </head>
-<body class="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50 font-sans">
+<body class="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 font-sans">
     <!-- Header -->
     <x-header />
     
     <!-- Main Content -->
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 dark:text-neutral-100">
         <div class="animate-fade-in">
             @yield('content')
         </div>

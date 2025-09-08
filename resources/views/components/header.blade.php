@@ -34,6 +34,16 @@
                     </a>
                 </nav>
 
+                <!-- Dark Mode Toggle -->
+                <button 
+                    onclick="toggleDarkMode()" 
+                    id="dark-mode-toggle"
+                    class="px-3 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium"
+                    title="Toggle Dark Mode">
+                    <i id="dark-mode-icon" class="fas fa-moon text-sm"></i>
+                    <span class="hidden lg:inline" id="dark-mode-text">Dark</span>
+                </button>
+
                 <!-- Language Switcher -->
                 @php
                     $languages = \App\Helpers\LanguageHelper::getSupportedLanguages();
@@ -80,6 +90,17 @@
                     <span>{{ __('app.organizations') }}</span>
                 </a>
             </div>
+            
+            <!-- Dark Mode Toggle - Mobile -->
+            <div class="border-t border-neutral-200 pt-4 mt-4">
+                <button 
+                    onclick="toggleDarkMode()" 
+                    class="flex items-center space-x-3 px-4 py-2 rounded-lg text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 w-full">
+                    <i id="dark-mode-icon-mobile" class="fas fa-moon text-sm w-5"></i>
+                    <span id="dark-mode-text-mobile">Toggle Dark Mode</span>
+                </button>
+            </div>
+            
             <div class="border-t border-neutral-200 pt-4 mt-4">
                 <p class="text-neutral-500 text-sm mb-3 px-4 font-medium">{{ __('app.switch_language') }}:</p>
                 <div class="space-y-1">
@@ -107,6 +128,71 @@ function toggleLanguageDropdown() {
     dropdown.classList.toggle('opacity-0');
     dropdown.classList.toggle('invisible');
 }
+
+function toggleDarkMode() {
+    // Get current dark mode state
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    
+    // Update icons and text
+    const icon = document.getElementById('dark-mode-icon');
+    const text = document.getElementById('dark-mode-text');
+    const iconMobile = document.getElementById('dark-mode-icon-mobile');
+    const textMobile = document.getElementById('dark-mode-text-mobile');
+    
+    if (isDarkMode) {
+        // Switch to light mode
+        icon.className = 'fas fa-moon text-sm';
+        text.textContent = 'Dark';
+        iconMobile.className = 'fas fa-moon text-sm w-5';
+        textMobile.textContent = 'Toggle Dark Mode';
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('darkMode', 'false');
+    } else {
+        // Switch to dark mode
+        icon.className = 'fas fa-sun text-sm';
+        text.textContent = 'Light';
+        iconMobile.className = 'fas fa-sun text-sm w-5';
+        textMobile.textContent = 'Toggle Light Mode';
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('darkMode', 'true');
+    }
+}
+
+// Initialize dark mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Determine initial dark mode state
+    const shouldBeDark = savedDarkMode === 'true' || (savedDarkMode === null && prefersDark);
+    
+    const icon = document.getElementById('dark-mode-icon');
+    const text = document.getElementById('dark-mode-text');
+    const iconMobile = document.getElementById('dark-mode-icon-mobile');
+    const textMobile = document.getElementById('dark-mode-text-mobile');
+    
+    if (shouldBeDark) {
+        // Set dark mode
+        document.documentElement.classList.add('dark');
+        if (icon) {
+            icon.className = 'fas fa-sun text-sm';
+            text.textContent = 'Light';
+            iconMobile.className = 'fas fa-sun text-sm w-5';
+            textMobile.textContent = 'Toggle Light Mode';
+        }
+        localStorage.setItem('darkMode', 'true');
+    } else {
+        // Set light mode
+        document.documentElement.classList.remove('dark');
+        if (icon) {
+            icon.className = 'fas fa-moon text-sm';
+            text.textContent = 'Dark';
+            iconMobile.className = 'fas fa-moon text-sm w-5';
+            textMobile.textContent = 'Toggle Dark Mode';
+        }
+        localStorage.setItem('darkMode', 'false');
+    }
+});
 
 // Close language dropdown when clicking outside
 document.addEventListener('click', function(event) {
