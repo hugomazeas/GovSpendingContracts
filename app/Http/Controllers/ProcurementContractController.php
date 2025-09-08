@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProcurementContract;
+use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\Cache;
 class ProcurementContractController extends Controller
 {
     public function __construct(
-        private readonly ProcurementAnalyticsService $analyticsService
+        private readonly ProcurementAnalyticsService $analyticsService,
+        private readonly ProcurementContractRepositoryInterface $contractRepository
     ) {}
 
     public function index(Request $request): View
@@ -49,51 +51,9 @@ class ProcurementContractController extends Controller
 
     public function data(Request $request): JsonResponse
     {
-        $query = ProcurementContract::query();
+        $repositoryData = $this->contractRepository->getDataTableData($request);
 
-        // Filter by year - this is critical for performance
-        $selectedYear = $request->get('year', date('Y'));
-        $query->where('contract_year', $selectedYear);
-
-        if ($request->has('search') && $request->search['value']) {
-            $searchValue = $request->search['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('vendor_name', 'like', "%{$searchValue}%")
-                    ->orWhere('reference_number', 'like', "%{$searchValue}%")
-                    ->orWhere('description_of_work_english', 'like', "%{$searchValue}%")
-                    ->orWhere('organization', 'like', "%{$searchValue}%")
-                    ->orWhere('commodity', 'like', "%{$searchValue}%");
-            });
-        }
-
-        $totalRecords = ProcurementContract::where('contract_year', $selectedYear)->count();
-        $filteredRecords = $query->count();
-
-        if ($request->has('order')) {
-            $columnIndex = $request->order[0]['column'];
-            $sortDirection = $request->order[0]['dir'];
-
-            $columns = [
-                0 => 'reference_number',
-                1 => 'vendor_name',
-                2 => 'contract_date',
-                3 => 'total_contract_value',
-                4 => 'organization',
-                5 => 'description_of_work_english',
-            ];
-
-            if (isset($columns[$columnIndex])) {
-                $query->orderBy($columns[$columnIndex], $sortDirection);
-            }
-        } else {
-            $query->orderBy('contract_date', 'desc');
-        }
-
-        $contracts = $query->offset($request->start ?? 0)
-            ->limit($request->length ?? 10)
-            ->get();
-
-        $data = $contracts->map(function ($contract) {
+        $data = $repositoryData['contracts']->map(function ($contract) {
             return [
                 'id' => $contract->id,
                 'reference_number' => $contract->reference_number,
@@ -114,8 +74,8 @@ class ProcurementContractController extends Controller
 
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
+            'recordsTotal' => $repositoryData['totalRecords'],
+            'recordsFiltered' => $repositoryData['filteredRecords'],
             'data' => $data,
         ]);
     }

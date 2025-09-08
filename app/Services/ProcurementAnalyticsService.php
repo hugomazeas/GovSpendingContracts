@@ -7,7 +7,6 @@ use Illuminate\Support\Collection;
 
 class ProcurementAnalyticsService
 {
-    // General Statistics
     public function getGeneralStatistics(int $year): array
     {
         $stats = ProcurementContract::where('contract_year', $year)

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Ajax;
 
 use App\Helpers\CurrencyFormatter;
 use App\Http\Controllers\Controller;
-use App\Models\ProcurementContract;
+use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Cache;
 class DashboardController extends Controller
 {
     public function __construct(
-        private readonly ProcurementAnalyticsService $analyticsService
+        private readonly ProcurementAnalyticsService $analyticsService,
+        private readonly ProcurementContractRepositoryInterface $contractRepository
     ) {}
 
     public function statsGrid(Request $request): JsonResponse
@@ -156,13 +157,7 @@ class DashboardController extends Controller
         $cacheKey = "org_spending_chart_{$decodedOrganization}";
 
         $chartData = Cache::remember($cacheKey, 600, function () use ($decodedOrganization) {
-            $spendingByYear = ProcurementContract::where('organization', $decodedOrganization)
-                ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
-                ->whereNotNull('contract_year')
-                ->whereNotNull('total_contract_value')
-                ->groupBy('contract_year')
-                ->orderBy('contract_year', 'asc')
-                ->get();
+            $spendingByYear = $this->contractRepository->getSpendingByYear($decodedOrganization);
 
             $years = $spendingByYear->pluck('contract_year')->toArray();
             $spending = $spendingByYear->pluck('total_spending')->toArray();
@@ -183,12 +178,7 @@ class DashboardController extends Controller
         $cacheKey = 'government_spending_chart';
 
         $chartData = Cache::remember($cacheKey, 600, function () {
-            $spendingByYear = ProcurementContract::selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
-                ->whereNotNull('contract_year')
-                ->whereNotNull('total_contract_value')
-                ->groupBy('contract_year')
-                ->orderBy('contract_year', 'asc')
-                ->get();
+            $spendingByYear = $this->contractRepository->getSpendingByYear();
 
             $years = $spendingByYear->pluck('contract_year')->toArray();
             $spending = $spendingByYear->pluck('total_spending')->toArray();
@@ -211,20 +201,9 @@ class DashboardController extends Controller
         $cacheKey = "organizations_pie_chart_{$selectedYear}";
 
         $chartData = Cache::remember($cacheKey, 300, function () use ($selectedYear) {
-            // Get top 10 organizations by spending for the year
-            $topOrganizations = ProcurementContract::where('contract_year', $selectedYear)
-                ->whereNotNull('organization')
-                ->whereNotNull('total_contract_value')
-                ->selectRaw('organization, SUM(total_contract_value) as total_spending')
-                ->groupBy('organization')
-                ->orderByDesc('total_spending')
-                ->limit(10)
-                ->get();
-
-            // Get total spending for the year to calculate "Others"
-            $totalYearSpending = ProcurementContract::where('contract_year', $selectedYear)
-                ->whereNotNull('total_contract_value')
-                ->sum('total_contract_value');
+            $pieData = $this->contractRepository->getOrganizationsPieChartData($selectedYear);
+            $topOrganizations = $pieData['topOrganizations'];
+            $totalYearSpending = $pieData['totalYearSpending'];
 
             $topOrganizationsSpending = $topOrganizations->sum('total_spending');
             $othersSpending = $totalYearSpending - $topOrganizationsSpending;
@@ -299,13 +278,7 @@ class DashboardController extends Controller
         $cacheKey = "vendor_revenue_chart_{$decodedVendor}";
 
         $chartData = Cache::remember($cacheKey, 600, function () use ($decodedVendor) {
-            $revenueByYear = ProcurementContract::where('vendor_name', $decodedVendor)
-                ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
-                ->whereNotNull('contract_year')
-                ->whereNotNull('total_contract_value')
-                ->groupBy('contract_year')
-                ->orderBy('contract_year', 'asc')
-                ->get();
+            $revenueByYear = $this->contractRepository->getSpendingByYearForVendor($decodedVendor);
 
             $years = $revenueByYear->pluck('contract_year')->toArray();
             $revenue = $revenueByYear->pluck('total_value')->toArray();
@@ -408,12 +381,7 @@ class DashboardController extends Controller
         $cacheKey = "vendor_org_historical_totals_{$decodedVendor}_{$decodedOrganization}";
 
         $historicalData = Cache::remember($cacheKey, 1800, function () use ($decodedVendor, $decodedOrganization) {
-            // Get all contracts for this vendor-organization partnership across all years
-            $contracts = ProcurementContract::where('vendor_name', $decodedVendor)
-                ->where('organization', $decodedOrganization)
-                ->whereNotNull('total_contract_value')
-                ->select('total_contract_value', 'contract_year')
-                ->get();
+            $contracts = $this->contractRepository->getVendorOrganizationHistoricalContracts($decodedVendor, $decodedOrganization);
 
             $totalContracts = $contracts->count();
             $totalValue = $contracts->sum('total_contract_value');
@@ -443,11 +411,7 @@ class DashboardController extends Controller
         $cacheKey = "vendor_historical_totals_{$decodedVendor}";
 
         $historicalData = Cache::remember($cacheKey, 1800, function () use ($decodedVendor) {
-            // Get all contracts for this vendor across all years
-            $contracts = ProcurementContract::where('vendor_name', $decodedVendor)
-                ->whereNotNull('total_contract_value')
-                ->select('total_contract_value', 'contract_year')
-                ->get();
+            $contracts = $this->contractRepository->getVendorHistoricalContracts($decodedVendor);
 
             $totalContracts = $contracts->count();
             $totalValue = $contracts->sum('total_contract_value');
@@ -472,13 +436,10 @@ class DashboardController extends Controller
 
     public function dashboardHistoricalTotals(): JsonResponse
     {
-        $cacheKey = "dashboard_historical_totals";
+        $cacheKey = 'dashboard_historical_totals';
 
         $historicalData = Cache::remember($cacheKey, 1800, function () {
-            // Get all contracts across all vendors and organizations
-            $contracts = ProcurementContract::whereNotNull('total_contract_value')
-                ->select('total_contract_value', 'contract_year')
-                ->get();
+            $contracts = $this->contractRepository->getAllHistoricalContracts();
 
             $totalContracts = $contracts->count();
             $totalValue = $contracts->sum('total_contract_value');

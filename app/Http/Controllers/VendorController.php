@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProcurementContract;
+use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Cache;
 class VendorController extends Controller
 {
     public function __construct(
-        private readonly ProcurementAnalyticsService $analyticsService
+        private readonly ProcurementAnalyticsService $analyticsService,
+        private readonly ProcurementContractRepositoryInterface $contractRepository
     ) {}
 
     public function detail(Request $request, string $vendor): View
@@ -46,56 +47,14 @@ class VendorController extends Controller
     {
         $decodedVendor = urldecode($vendor);
 
-        $query = ProcurementContract::query()
-            ->where('vendor_name', $decodedVendor);
-
-        // Filter by year - this is critical for performance
-        $selectedYear = $request->get('year');
-        if (! $selectedYear) {
-            // Get the most recent year with data for this vendor
+        if (! $request->get('year')) {
             $selectedYear = $this->analyticsService->getAvailableYearsForVendor($decodedVendor)->first() ?? date('Y');
-        }
-        $query->where('contract_year', $selectedYear);
-
-        if ($request->has('search') && $request->search['value']) {
-            $searchValue = $request->search['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('reference_number', 'like', "%{$searchValue}%")
-                    ->orWhere('description_of_work_english', 'like', "%{$searchValue}%")
-                    ->orWhere('organization', 'like', "%{$searchValue}%")
-                    ->orWhere('commodity', 'like', "%{$searchValue}%");
-            });
+            $request->merge(['year' => $selectedYear]);
         }
 
-        $totalRecords = ProcurementContract::where('vendor_name', $decodedVendor)
-            ->where('contract_year', $selectedYear)
-            ->count();
-        $filteredRecords = $query->count();
+        $repositoryData = $this->contractRepository->getVendorDataTableData($decodedVendor, $request);
 
-        if ($request->has('order')) {
-            $columnIndex = $request->order[0]['column'];
-            $sortDirection = $request->order[0]['dir'];
-
-            $columns = [
-                0 => 'reference_number',
-                1 => 'contract_date',
-                2 => 'total_contract_value',
-                3 => 'organization',
-                4 => 'description_of_work_english',
-            ];
-
-            if (isset($columns[$columnIndex])) {
-                $query->orderBy($columns[$columnIndex], $sortDirection);
-            }
-        } else {
-            $query->orderBy('contract_date', 'desc');
-        }
-
-        $contracts = $query->offset($request->start ?? 0)
-            ->limit($request->length ?? 10)
-            ->get();
-
-        $data = $contracts->map(function ($contract) use ($decodedVendor) {
+        $data = $repositoryData['contracts']->map(function ($contract) use ($decodedVendor) {
             return [
                 'id' => $contract->id,
                 'reference_number' => $contract->reference_number,
@@ -113,8 +72,8 @@ class VendorController extends Controller
 
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
+            'recordsTotal' => $repositoryData['totalRecords'],
+            'recordsFiltered' => $repositoryData['filteredRecords'],
             'data' => $data,
         ]);
     }
@@ -147,55 +106,14 @@ class VendorController extends Controller
         $decodedVendor = urldecode($vendor);
         $decodedOrganization = urldecode($organization);
 
-        $query = ProcurementContract::query()
-            ->where('vendor_name', $decodedVendor)
-            ->where('organization', $decodedOrganization);
-
-        $selectedYear = $request->get('year');
-        if (! $selectedYear) {
-            // Get the most recent year with data for this vendor-organization combination
+        if (! $request->get('year')) {
             $selectedYear = $this->analyticsService->getAvailableYearsForVendorOrganization($decodedVendor, $decodedOrganization)->first() ?? date('Y');
-        }
-        $query->where('contract_year', $selectedYear);
-
-        if ($request->has('search') && $request->search['value']) {
-            $searchValue = $request->search['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('reference_number', 'like', "%{$searchValue}%")
-                    ->orWhere('description_of_work_english', 'like', "%{$searchValue}%")
-                    ->orWhere('commodity', 'like', "%{$searchValue}%");
-            });
+            $request->merge(['year' => $selectedYear]);
         }
 
-        $totalRecords = ProcurementContract::where('vendor_name', $decodedVendor)
-            ->where('organization', $decodedOrganization)
-            ->where('contract_year', $selectedYear)
-            ->count();
-        $filteredRecords = $query->count();
+        $repositoryData = $this->contractRepository->getVendorOrganizationDataTableData($decodedVendor, $decodedOrganization, $request);
 
-        if ($request->has('order')) {
-            $columnIndex = $request->order[0]['column'];
-            $sortDirection = $request->order[0]['dir'];
-
-            $columns = [
-                0 => 'reference_number',
-                1 => 'contract_date',
-                2 => 'total_contract_value',
-                3 => 'description_of_work_english',
-            ];
-
-            if (isset($columns[$columnIndex])) {
-                $query->orderBy($columns[$columnIndex], $sortDirection);
-            }
-        } else {
-            $query->orderBy('contract_date', 'desc');
-        }
-
-        $contracts = $query->offset($request->start ?? 0)
-            ->limit($request->length ?? 10)
-            ->get();
-
-        $data = $contracts->map(function ($contract) {
+        $data = $repositoryData['contracts']->map(function ($contract) {
             return [
                 'id' => $contract->id,
                 'reference_number' => $contract->reference_number,
@@ -210,8 +128,8 @@ class VendorController extends Controller
 
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
+            'recordsTotal' => $repositoryData['totalRecords'],
+            'recordsFiltered' => $repositoryData['filteredRecords'],
             'data' => $data,
         ]);
     }

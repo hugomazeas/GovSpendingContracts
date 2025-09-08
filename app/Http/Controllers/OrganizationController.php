@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProcurementContract;
+use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Cache;
 class OrganizationController extends Controller
 {
     public function __construct(
-        private readonly ProcurementAnalyticsService $analyticsService
+        private readonly ProcurementAnalyticsService $analyticsService,
+        private readonly ProcurementContractRepositoryInterface $contractRepository
     ) {}
 
     public function index(): View
@@ -38,54 +39,34 @@ class OrganizationController extends Controller
         ]));
 
         return Cache::remember($cacheKey, 1800, function () use ($request, $searchValue, $orderColumn, $orderDir, $start, $length) {
-            // Get the last 4 years to calculate percentage changes (but only display 3)
             $currentYear = date('Y');
             $lastThreeYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3];
             $fourthYear = $currentYear - 4;
             $allYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3, $currentYear - 4];
 
-            // Base query for organizations with their spending data
-            $query = ProcurementContract::selectRaw("
-                    organization,
-                    SUM(CASE WHEN contract_year = {$lastThreeYears[0]} THEN total_contract_value ELSE 0 END) as spending_year_1,
-                    SUM(CASE WHEN contract_year = {$lastThreeYears[1]} THEN total_contract_value ELSE 0 END) as spending_year_2,
-                    SUM(CASE WHEN contract_year = {$lastThreeYears[2]} THEN total_contract_value ELSE 0 END) as spending_year_3,
-                    SUM(CASE WHEN contract_year = {$fourthYear} THEN total_contract_value ELSE 0 END) as spending_year_4,
-                    SUM(total_contract_value) as total_spending
-                ")
-                ->whereNotNull('organization')
-                ->whereNotNull('total_contract_value')
-                ->whereIn('contract_year', $allYears)
-                ->groupBy('organization');
+            $organizations = $this->contractRepository->getOrganizationSpendingAnalysis($allYears);
 
             // Apply search filter
             if (! empty($searchValue)) {
-                $query->where('organization', 'LIKE', "%{$searchValue}%");
+                $organizations = $organizations->filter(function ($org) use ($searchValue) {
+                    return stripos($org->organization, $searchValue) !== false;
+                });
             }
 
-            // Clone query for counting
             $totalRecords = Cache::remember('organizations_total_count', 3600, function () use ($allYears) {
-                return ProcurementContract::selectRaw('COUNT(DISTINCT organization) as count')
-                    ->whereNotNull('organization')
-                    ->whereNotNull('total_contract_value')
-                    ->whereIn('contract_year', $allYears)
-                    ->first()
-                    ->count ?? 0;
+                return $this->contractRepository->getOrganizationSpendingAnalysis($allYears)->count();
             });
 
-            $filteredQuery = clone $query;
-            $filteredRecords = $filteredQuery->get()->count();
+            $filteredRecords = $organizations->count();
 
             // Apply sorting
             $columns = ['organization', 'spending_year_1', 'spending_year_2', 'spending_year_3'];
             $orderByColumn = $columns[$orderColumn] ?? 'spending_year_1';
 
-            $query->orderBy($orderByColumn, $orderDir);
+            $organizations = $organizations->sortBy($orderByColumn, SORT_REGULAR, $orderDir === 'desc');
 
             // Apply pagination
-            $organizations = $query->offset($start)
-                ->limit($length)
-                ->get();
+            $organizations = $organizations->slice($start, $length);
 
             $data = $organizations->map(function ($org) use ($lastThreeYears) {
                 $year1Spending = (float) $org->spending_year_1;
@@ -191,54 +172,14 @@ class OrganizationController extends Controller
     {
         $decodedOrganization = urldecode($organization);
 
-        $query = ProcurementContract::query()
-            ->where('organization', $decodedOrganization);
-
-        $selectedYear = $request->get('year');
-        if (! $selectedYear) {
-            // Get the most recent year with data for this organization
+        if (! $request->get('year')) {
             $selectedYear = $this->analyticsService->getAvailableYearsForOrganization($decodedOrganization)->first() ?? date('Y');
-        }
-        $query->where('contract_year', $selectedYear);
-
-        if ($request->has('search') && $request->search['value']) {
-            $searchValue = $request->search['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('vendor_name', 'like', "%{$searchValue}%")
-                    ->orWhere('reference_number', 'like', "%{$searchValue}%")
-                    ->orWhere('description_of_work_english', 'like', "%{$searchValue}%");
-            });
+            $request->merge(['year' => $selectedYear]);
         }
 
-        $totalRecords = ProcurementContract::where('organization', $decodedOrganization)
-            ->where('contract_year', $selectedYear)
-            ->count();
-        $filteredRecords = $query->count();
+        $repositoryData = $this->contractRepository->getOrganizationDataTableData($decodedOrganization, $request);
 
-        if ($request->has('order')) {
-            $columnIndex = $request->order[0]['column'];
-            $sortDirection = $request->order[0]['dir'];
-
-            $columns = [
-                0 => 'vendor_name',
-                1 => 'reference_number',
-                2 => 'contract_date',
-                3 => 'total_contract_value',
-                4 => 'description_of_work_english',
-            ];
-
-            if (isset($columns[$columnIndex])) {
-                $query->orderBy($columns[$columnIndex], $sortDirection);
-            }
-        } else {
-            $query->orderBy('contract_date', 'desc');
-        }
-
-        $contracts = $query->offset($request->start ?? 0)
-            ->limit($request->length ?? 10)
-            ->get();
-
-        $data = $contracts->map(function ($contract) use ($decodedOrganization) {
+        $data = $repositoryData['contracts']->map(function ($contract) use ($decodedOrganization) {
             return [
                 'id' => $contract->id,
                 'vendor_name' => $contract->vendor_name ?
@@ -256,8 +197,8 @@ class OrganizationController extends Controller
 
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
+            'recordsTotal' => $repositoryData['totalRecords'],
+            'recordsFiltered' => $repositoryData['filteredRecords'],
             'data' => $data,
         ]);
     }
