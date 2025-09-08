@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
+use App\Services\VendorDataService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,8 @@ class VendorController extends Controller
 {
     public function __construct(
         private readonly ProcurementAnalyticsService $analyticsService,
-        private readonly ProcurementContractRepositoryInterface $contractRepository
+        private readonly ProcurementContractRepositoryInterface $contractRepository,
+        private readonly VendorDataService $vendorDataService
     ) {}
 
     public function detail(Request $request, string $vendor): View
@@ -54,21 +56,7 @@ class VendorController extends Controller
 
         $repositoryData = $this->contractRepository->getVendorDataTableData($decodedVendor, $request);
 
-        $data = $repositoryData['contracts']->map(function ($contract) use ($decodedVendor) {
-            return [
-                'id' => $contract->id,
-                'reference_number' => $contract->reference_number,
-                'contract_date' => $contract->contract_date?->format('Y-m-d'),
-                'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
-                'organization' => $contract->organization ?
-                    '<div class="flex flex-col gap-1"><a href="'.route('organization.detail', ['organization' => urlencode($contract->organization)]).'" class="text-purple-600 hover:text-purple-800 hover:underline font-medium transition-colors">'.e($contract->organization).'</a><a href="'.route('vendor.organization.contracts', ['vendor' => urlencode($decodedVendor), 'organization' => urlencode($contract->organization)]).'" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-medium transition-colors"><i class="fas fa-handshake mr-1"></i>View partnership</a></div>' :
-                    '-',
-                'description_of_work_english' => $contract->description_of_work_english ?
-                    (strlen($contract->description_of_work_english) > 100 ?
-                        substr($contract->description_of_work_english, 0, 100).'...' :
-                        $contract->description_of_work_english) : '-',
-            ];
-        });
+        $data = $this->vendorDataService->formatVendorContractsData($repositoryData['contracts'], $decodedVendor);
 
         return response()->json([
             'draw' => intval($request->draw),
@@ -113,18 +101,7 @@ class VendorController extends Controller
 
         $repositoryData = $this->contractRepository->getVendorOrganizationDataTableData($decodedVendor, $decodedOrganization, $request);
 
-        $data = $repositoryData['contracts']->map(function ($contract) {
-            return [
-                'id' => $contract->id,
-                'reference_number' => $contract->reference_number,
-                'contract_date' => $contract->contract_date?->format('Y-m-d'),
-                'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
-                'description_of_work_english' => $contract->description_of_work_english ?
-                    (strlen($contract->description_of_work_english) > 100 ?
-                        substr($contract->description_of_work_english, 0, 100).'...' :
-                        $contract->description_of_work_english) : '-',
-            ];
-        });
+        $data = $this->vendorDataService->formatVendorOrganizationContractsData($repositoryData['contracts']);
 
         return response()->json([
             'draw' => intval($request->draw),

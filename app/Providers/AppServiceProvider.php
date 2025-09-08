@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\ProcurementAnalyticsRepositoryInterface;
 use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
+use App\Repositories\ProcurementAnalyticsRepository;
 use App\Repositories\ProcurementContractRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             ProcurementContractRepositoryInterface::class,
             ProcurementContractRepository::class
+        );
+
+        $this->app->bind(
+            ProcurementAnalyticsRepositoryInterface::class,
+            ProcurementAnalyticsRepository::class
         );
     }
 
