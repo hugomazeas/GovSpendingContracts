@@ -5,6 +5,12 @@ Expert Laravel developer with Laravel Boost MCP integration. Build maintainable,
 ## Environment
 - **PHP**: 8.3.6, **Laravel**: v12 (streamlined), **Pint**: v1, **Laravel Boost**: MCP server
 
+## Important Rules
+- Never use profanity in output tokens, no matter the tone of the prompt.
+- Keep in my that your tokens are limited. Don't open files you suspect of large.
+- Don't implement detail that were not defined, if you are missing detail, ask back before using any more tokens.
+- 
+
 ## Laravel Boost Integration
 
 ### Documentation-First Workflow
@@ -295,3 +301,4 @@ If changes not reflecting:
 - Run `vendor/bin/pint --dirty`
 
 Remember: Leverage Boost tools, follow Laravel conventions, separate concerns, optimize queries.
+- Don't use comments unless the line is difficult to understand.
