@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProcurementContract;
+use App\Repositories\Contracts\ContractRepositoryInterface;
+use App\Services\OrganizationDataService;
 use App\Services\ProcurementAnalyticsService;
+use App\Services\VendorDataService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +14,10 @@ use Illuminate\Support\Facades\Cache;
 class OrganizationController extends Controller
 {
     public function __construct(
-        private readonly ProcurementAnalyticsService $analyticsService
+        private readonly ProcurementAnalyticsService $analyticsService,
+        private readonly ContractRepositoryInterface $contractRepository,
+        private readonly OrganizationDataService $organizationDataService,
+        private readonly VendorDataService $vendorDataService
     ) {}
 
     public function index(): View
@@ -37,127 +42,30 @@ class OrganizationController extends Controller
             'length' => $length,
         ]));
 
-        return Cache::remember($cacheKey, 1800, function () use ($request, $searchValue, $orderColumn, $orderDir, $start, $length) {
-            // Get the last 4 years to calculate percentage changes (but only display 3)
+        $responseData = Cache::remember($cacheKey, 1800, function () use ($request, $searchValue, $orderColumn, $orderDir, $start, $length) {
             $currentYear = date('Y');
             $lastThreeYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3];
-            $fourthYear = $currentYear - 4;
             $allYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3, $currentYear - 4];
 
-            // Base query for organizations with their spending data
-            $query = ProcurementContract::selectRaw("
-                    organization,
-                    SUM(CASE WHEN contract_year = {$lastThreeYears[0]} THEN total_contract_value ELSE 0 END) as spending_year_1,
-                    SUM(CASE WHEN contract_year = {$lastThreeYears[1]} THEN total_contract_value ELSE 0 END) as spending_year_2,
-                    SUM(CASE WHEN contract_year = {$lastThreeYears[2]} THEN total_contract_value ELSE 0 END) as spending_year_3,
-                    SUM(CASE WHEN contract_year = {$fourthYear} THEN total_contract_value ELSE 0 END) as spending_year_4,
-                    SUM(total_contract_value) as total_spending
-                ")
-                ->whereNotNull('organization')
-                ->whereNotNull('total_contract_value')
-                ->whereIn('contract_year', $allYears)
-                ->groupBy('organization');
+            $organizations = $this->contractRepository->getOrganizationSpendingAnalysis($allYears);
+            $organizations = $this->organizationDataService->applySearch($organizations, $searchValue);
 
-            // Apply search filter
-            if (! empty($searchValue)) {
-                $query->where('organization', 'LIKE', "%{$searchValue}%");
-            }
-
-            // Clone query for counting
             $totalRecords = Cache::remember('organizations_total_count', 3600, function () use ($allYears) {
-                return ProcurementContract::selectRaw('COUNT(DISTINCT organization) as count')
-                    ->whereNotNull('organization')
-                    ->whereNotNull('total_contract_value')
-                    ->whereIn('contract_year', $allYears)
-                    ->first()
-                    ->count ?? 0;
+                return $this->contractRepository->getOrganizationSpendingAnalysis($allYears)->count();
             });
 
-            $filteredQuery = clone $query;
-            $filteredRecords = $filteredQuery->get()->count();
+            $filteredRecords = $organizations->count();
+            $organizations = $this->organizationDataService->applySorting($organizations, $orderColumn, $orderDir);
+            $organizations = $organizations->slice($start, $length);
 
-            // Apply sorting
-            $columns = ['organization', 'spending_year_1', 'spending_year_2', 'spending_year_3'];
-            $orderByColumn = $columns[$orderColumn] ?? 'spending_year_1';
+            $data = $this->organizationDataService->calculateYearOverYearChanges($organizations, $lastThreeYears);
 
-            $query->orderBy($orderByColumn, $orderDir);
-
-            // Apply pagination
-            $organizations = $query->offset($start)
-                ->limit($length)
-                ->get();
-
-            $data = $organizations->map(function ($org) use ($lastThreeYears) {
-                $year1Spending = (float) $org->spending_year_1;
-                $year2Spending = (float) $org->spending_year_2;
-                $year3Spending = (float) $org->spending_year_3;
-                $year4Spending = (float) $org->spending_year_4;
-
-                // Calculate year-over-year percentage changes with HTML color coding
-                $change1to2 = '';
-                $change2to3 = '';
-                $change3to4 = '';
-
-                // Change from year 2 to year 1 (most recent change)
-                if ($year2Spending > 0) {
-                    $percentageChange = (($year1Spending - $year2Spending) / $year2Spending) * 100;
-                    if ($percentageChange > 0) {
-                        $change1to2 = '<span class="text-green-600">↗ +'.number_format($percentageChange, 1).'%</span>';
-                    } elseif ($percentageChange < 0) {
-                        $change1to2 = '<span class="text-red-600">↘ '.number_format($percentageChange, 1).'%</span>';
-                    } else {
-                        $change1to2 = '<span class="text-gray-600">→ 0%</span>';
-                    }
-                } elseif ($year1Spending > 0) {
-                    $change1to2 = '--';
-                }
-
-                // Change from year 3 to year 2
-                if ($year3Spending > 0) {
-                    $percentageChange = (($year2Spending - $year3Spending) / $year3Spending) * 100;
-                    if ($percentageChange > 0) {
-                        $change2to3 = '<span class="text-green-600">↗ +'.number_format($percentageChange, 1).'%</span>';
-                    } elseif ($percentageChange < 0) {
-                        $change2to3 = '<span class="text-red-600">↘ '.number_format($percentageChange, 1).'%</span>';
-                    } else {
-                        $change2to3 = '<span class="text-gray-600">→ 0%</span>';
-                    }
-                } elseif ($year2Spending > 0) {
-                    $change2to3 = '--';
-                }
-
-                // Change from year 4 to year 3 (oldest change)
-                if ($year4Spending > 0) {
-                    $percentageChange = (($year3Spending - $year4Spending) / $year4Spending) * 100;
-                    if ($percentageChange > 0) {
-                        $change3to4 = '<span class="text-green-600">↗ +'.number_format($percentageChange, 1).'%</span>';
-                    } elseif ($percentageChange < 0) {
-                        $change3to4 = '<span class="text-red-600">↘ '.number_format($percentageChange, 1).'%</span>';
-                    } else {
-                        $change3to4 = '<span class="text-gray-600">→ 0%</span>';
-                    }
-                } elseif ($year3Spending > 0) {
-                    $change3to4 = '--';
-                }
-
-                return [
-                    'organization' => '<a href="'.route('organization.detail', ['organization' => urlencode($org->organization)]).'" class="text-purple-600 hover:text-purple-800 hover:underline font-medium transition-colors">'.e($org->organization).'</a>',
-                    'spending_'.$lastThreeYears[0] => $year1Spending > 0 ? '$'.number_format($year1Spending, 0) : '-',
-                    'spending_'.$lastThreeYears[1] => $year2Spending > 0 ? '$'.number_format($year2Spending, 0) : '-',
-                    'spending_'.$lastThreeYears[2] => $year3Spending > 0 ? '$'.number_format($year3Spending, 0) : '-',
-                    'change_year_1' => $change1to2,
-                    'change_year_2' => $change2to3,
-                    'change_year_3' => $change3to4,
-                ];
-            });
-
-            return response()->json([
-                'draw' => intval($request->draw),
-                'recordsTotal' => $totalRecords,
-                'recordsFiltered' => $filteredRecords,
-                'data' => $data,
-            ]);
+            return $this->organizationDataService->formatDataTableResponse([
+                'draw' => $request->draw,
+            ], $data, $totalRecords, $filteredRecords);
         });
+
+        return response()->json($responseData);
     }
 
     public function detail(Request $request, string $organization): View
@@ -191,73 +99,19 @@ class OrganizationController extends Controller
     {
         $decodedOrganization = urldecode($organization);
 
-        $query = ProcurementContract::query()
-            ->where('organization', $decodedOrganization);
-
-        $selectedYear = $request->get('year');
-        if (! $selectedYear) {
-            // Get the most recent year with data for this organization
+        if (! $request->get('year')) {
             $selectedYear = $this->analyticsService->getAvailableYearsForOrganization($decodedOrganization)->first() ?? date('Y');
-        }
-        $query->where('contract_year', $selectedYear);
-
-        if ($request->has('search') && $request->search['value']) {
-            $searchValue = $request->search['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('vendor_name', 'like', "%{$searchValue}%")
-                    ->orWhere('reference_number', 'like', "%{$searchValue}%")
-                    ->orWhere('description_of_work_english', 'like', "%{$searchValue}%");
-            });
+            $request->merge(['year' => $selectedYear]);
         }
 
-        $totalRecords = ProcurementContract::where('organization', $decodedOrganization)
-            ->where('contract_year', $selectedYear)
-            ->count();
-        $filteredRecords = $query->count();
+        $repositoryData = $this->contractRepository->getOrganizationDataTableData($decodedOrganization, $request);
 
-        if ($request->has('order')) {
-            $columnIndex = $request->order[0]['column'];
-            $sortDirection = $request->order[0]['dir'];
-
-            $columns = [
-                0 => 'vendor_name',
-                1 => 'reference_number',
-                2 => 'contract_date',
-                3 => 'total_contract_value',
-                4 => 'description_of_work_english',
-            ];
-
-            if (isset($columns[$columnIndex])) {
-                $query->orderBy($columns[$columnIndex], $sortDirection);
-            }
-        } else {
-            $query->orderBy('contract_date', 'desc');
-        }
-
-        $contracts = $query->offset($request->start ?? 0)
-            ->limit($request->length ?? 10)
-            ->get();
-
-        $data = $contracts->map(function ($contract) use ($decodedOrganization) {
-            return [
-                'id' => $contract->id,
-                'vendor_name' => $contract->vendor_name ?
-                    '<div class="flex flex-col gap-1"><a href="'.route('vendor.detail', ['vendor' => urlencode($contract->vendor_name)]).'" class="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">'.e($contract->vendor_name).'</a><a href="'.route('vendor.organization.contracts', ['vendor' => urlencode($contract->vendor_name), 'organization' => urlencode($decodedOrganization)]).'" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-medium transition-colors"><i class="fas fa-handshake mr-1"></i>View partnership</a></div>' :
-                    '-',
-                'reference_number' => $contract->reference_number,
-                'contract_date' => $contract->contract_date?->format('Y-m-d'),
-                'total_contract_value' => $contract->total_contract_value ? '$'.number_format($contract->total_contract_value, 2) : '-',
-                'description_of_work_english' => $contract->description_of_work_english ?
-                    (strlen($contract->description_of_work_english) > 100 ?
-                        substr($contract->description_of_work_english, 0, 100).'...' :
-                        $contract->description_of_work_english) : '-',
-            ];
-        });
+        $data = $this->vendorDataService->formatOrganizationContractsData($repositoryData['contracts'], $decodedOrganization);
 
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
+            'recordsTotal' => $repositoryData['totalRecords'],
+            'recordsFiltered' => $repositoryData['filteredRecords'],
             'data' => $data,
         ]);
     }

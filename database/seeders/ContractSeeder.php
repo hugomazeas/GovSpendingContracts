@@ -2,18 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\ProcurementContract;
+use App\Models\Contract;
+use Exception;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
-class ProcurementContractSeeder extends Seeder
+class ContractSeeder extends Seeder
 {
     use WithoutModelEvents;
 
     private int $errorCount = 0;
+
     private array $validationErrors = [];
+
     private int $memoryPeakMB = 0;
 
     /**
@@ -24,14 +26,15 @@ class ProcurementContractSeeder extends Seeder
         // Disable query logging and optimize for large datasets
         DB::disableQueryLog();
         ini_set('memory_limit', '2G');
-        
+
         $this->command->info('🧹 Clearing existing data...');
-        ProcurementContract::truncate();
+        Contract::truncate();
 
         $csvFile = base_path('data/data.csv');
 
         if (! file_exists($csvFile)) {
             $this->command->error('❌ CSV file not found at: '.$csvFile);
+
             return;
         }
 
@@ -40,8 +43,9 @@ class ProcurementContractSeeder extends Seeder
         $this->command->info('🚀 Starting optimized CSV import...');
 
         $handle = fopen($csvFile, 'r');
-        if (!$handle) {
+        if (! $handle) {
             $this->command->error('❌ Failed to open CSV file');
+
             return;
         }
 
@@ -61,16 +65,17 @@ class ProcurementContractSeeder extends Seeder
         try {
             while (($data = fgetcsv($handle)) !== false) {
                 $lineNumber++;
-                
+
                 try {
                     $record = $this->processRecord($data, $columnMap, $lineNumber);
-                    
+
                     if ($record !== null) {
                         $batch[] = $record;
                         $count++;
                     }
                 } catch (Exception $e) {
                     $this->handleRecordError($e, $lineNumber, $data);
+
                     continue;
                 }
 
@@ -78,7 +83,7 @@ class ProcurementContractSeeder extends Seeder
                 if (count($batch) >= $batchSize) {
                     $this->processBatch($batch, $count);
                     $batch = [];
-                    
+
                     // Memory management
                     $this->trackMemoryUsage();
                     if (memory_get_usage(true) > 1.5 * 1024 * 1024 * 1024) { // 1.5GB threshold
@@ -95,13 +100,13 @@ class ProcurementContractSeeder extends Seeder
             }
 
             // Process final batch
-            if (!empty($batch)) {
+            if (! empty($batch)) {
                 $this->processBatch($batch, $count);
             }
 
         } catch (Exception $e) {
-            $this->command->error("💥 Critical error at line {$lineNumber}: " . $e->getMessage());
-            $this->command->error("Stack trace: " . $e->getTraceAsString());
+            $this->command->error("💥 Critical error at line {$lineNumber}: ".$e->getMessage());
+            $this->command->error('Stack trace: '.$e->getTraceAsString());
             throw $e;
         } finally {
             fclose($handle);
@@ -114,7 +119,7 @@ class ProcurementContractSeeder extends Seeder
     {
         // Validate row has enough columns
         if (count($data) < max($columnMap)) {
-            throw new Exception("Insufficient columns: expected at least " . (max($columnMap) + 1) . ", got " . count($data));
+            throw new Exception('Insufficient columns: expected at least '.(max($columnMap) + 1).', got '.count($data));
         }
 
         $record = [];
@@ -129,7 +134,7 @@ class ProcurementContractSeeder extends Seeder
 
             $cleanedValue = $this->cleanValue($value, $dbField);
             $record[$dbField] = $cleanedValue;
-            
+
             // Check if we have some meaningful data
             if ($cleanedValue !== null && in_array($dbField, ['vendor_name', 'total_contract_value', 'organization'])) {
                 $hasValidData = true;
@@ -137,14 +142,16 @@ class ProcurementContractSeeder extends Seeder
         }
 
         // Skip completely empty records
-        if (!$hasValidData) {
+        if (! $hasValidData) {
             $this->validationErrors[] = "Line {$lineNumber}: No meaningful data found";
+
             return null;
         }
 
         // Validate required fields
         if (empty($record['vendor_name']) && empty($record['organization'])) {
             $this->validationErrors[] = "Line {$lineNumber}: Missing both vendor_name and organization";
+
             return null;
         }
 
@@ -157,24 +164,24 @@ class ProcurementContractSeeder extends Seeder
     private function processBatch(array $batch, int $totalCount): void
     {
         try {
-            DB::table('procurement_contracts')->insert($batch);
+            DB::table('contracts')->insert($batch);
         } catch (Exception $e) {
-            $this->command->error("💥 Batch insert failed at record {$totalCount}: " . $e->getMessage());
-            
+            $this->command->error("💥 Batch insert failed at record {$totalCount}: ".$e->getMessage());
+
             // Try inserting records one by one to identify the problematic record
-            $this->command->info("🔍 Attempting individual record insertion to identify problem...");
-            
+            $this->command->info('🔍 Attempting individual record insertion to identify problem...');
+
             foreach ($batch as $index => $record) {
                 try {
-                    DB::table('procurement_contracts')->insert([$record]);
+                    DB::table('contracts')->insert([$record]);
                 } catch (Exception $individualError) {
                     $recordIndex = $totalCount - count($batch) + $index + 1;
-                    $this->command->error("❌ Failed record #{$recordIndex}: " . $individualError->getMessage());
-                    $this->command->error("🔍 Problematic data: " . json_encode($record, JSON_UNESCAPED_UNICODE));
+                    $this->command->error("❌ Failed record #{$recordIndex}: ".$individualError->getMessage());
+                    $this->command->error('🔍 Problematic data: '.json_encode($record, JSON_UNESCAPED_UNICODE));
                     $this->errorCount++;
-                    
+
                     if ($this->errorCount > 10) {
-                        $this->command->error("⚠️ Too many errors, stopping individual analysis");
+                        $this->command->error('⚠️ Too many errors, stopping individual analysis');
                         throw $e; // Re-throw original batch error
                     }
                 }
@@ -185,14 +192,14 @@ class ProcurementContractSeeder extends Seeder
     private function handleRecordError(Exception $e, int $lineNumber, array $data): void
     {
         $this->errorCount++;
-        $dataPreview = implode(',', array_slice($data, 0, 5)) . '...';
+        $dataPreview = implode(',', array_slice($data, 0, 5)).'...';
         $this->validationErrors[] = "Line {$lineNumber}: {$e->getMessage()} (Data: {$dataPreview})";
-        
+
         // Show first few errors immediately to help debug
         if ($this->errorCount <= 5) {
             $this->command->warn("🔍 Validation error #{$this->errorCount} at line {$lineNumber}: {$e->getMessage()}");
         }
-        
+
         // Stop if too many consecutive errors - but be more lenient
         if ($this->errorCount > 500) {
             throw new Exception("Too many validation errors ({$this->errorCount}), stopping import");
@@ -210,11 +217,11 @@ class ProcurementContractSeeder extends Seeder
     private function displayResults(int $count): void
     {
         $this->command->info("\n✅ Import completed!");
-        $this->command->info("📊 Total records processed: " . number_format($count));
+        $this->command->info('📊 Total records processed: '.number_format($count));
         $this->command->info("❌ Validation errors: {$this->errorCount}");
         $this->command->info("💾 Peak memory usage: {$this->memoryPeakMB}MB");
-        
-        if (!empty($this->validationErrors) && count($this->validationErrors) <= 20) {
+
+        if (! empty($this->validationErrors) && count($this->validationErrors) <= 20) {
             $this->command->warn("\n⚠️ Validation errors:");
             foreach (array_slice($this->validationErrors, 0, 10) as $error) {
                 $this->command->warn("  • {$error}");
@@ -226,13 +233,13 @@ class ProcurementContractSeeder extends Seeder
         }
 
         // Test a few values
-        $sample = ProcurementContract::whereNotNull('total_contract_value')->first();
+        $sample = Contract::whereNotNull('total_contract_value')->first();
         if ($sample) {
             $this->command->info('💰 Sample contract value: $'.number_format($sample->total_contract_value, 2));
         }
-        
-        $dbCount = ProcurementContract::count();
-        $this->command->info("🗄️ Records in database: " . number_format($dbCount));
+
+        $dbCount = Contract::count();
+        $this->command->info('🗄️ Records in database: '.number_format($dbCount));
     }
 
     /**
@@ -301,7 +308,7 @@ class ProcurementContractSeeder extends Seeder
 
         // Trim whitespace
         $value = trim($value);
-        
+
         if ($value === '' || $value === '-' || $value === 'NA' || $value === 'N/A') {
             return null;
         }
@@ -319,17 +326,19 @@ class ProcurementContractSeeder extends Seeder
 
     private function parseDecimal(?string $value, string $field): ?float
     {
-        if ($value === null) return null;
-        
+        if ($value === null) {
+            return null;
+        }
+
         // Remove common currency symbols and formatting
         $cleaned = preg_replace('/[,$\s\$]/', '', $value);
-        
+
         // Handle various formats
         if (empty($cleaned) || $cleaned === '0' || $cleaned === '0.00') {
             return 0.0;
         }
-        
-        if (!is_numeric($cleaned)) {
+
+        if (! is_numeric($cleaned)) {
             // Try to extract numbers from mixed content
             if (preg_match('/([0-9]+\.?[0-9]*)/', $cleaned, $matches)) {
                 $cleaned = $matches[1];
@@ -338,29 +347,31 @@ class ProcurementContractSeeder extends Seeder
                 return null;
             }
         }
-        
+
         $result = (float) $cleaned;
-        
+
         // Allow negative values for amendment values (could be reductions)
-        if ($result < 0 && !in_array($field, ['contract_amendment_value'])) {
+        if ($result < 0 && ! in_array($field, ['contract_amendment_value'])) {
             return null; // Skip instead of error
         }
-        
+
         if ($result > 999999999999) { // 999 billion limit
             return null; // Skip instead of error
         }
-        
+
         return $result;
     }
 
     private function parseInteger(?string $value, string $field): ?int
     {
-        if ($value === null) return null;
-        
+        if ($value === null) {
+            return null;
+        }
+
         // Clean the value
         $cleaned = trim($value);
-        
-        if (!is_numeric($cleaned) || (float)$cleaned != (int)$cleaned) {
+
+        if (! is_numeric($cleaned) || (float) $cleaned != (int) $cleaned) {
             // Try to extract integer from mixed content
             if (preg_match('/([0-9]+)/', $cleaned, $matches)) {
                 $cleaned = $matches[1];
@@ -368,66 +379,74 @@ class ProcurementContractSeeder extends Seeder
                 return null; // Skip invalid values
             }
         }
-        
+
         $result = (int) $cleaned;
-        
+
         // Validate reasonable ranges
         if ($field === 'contract_year') {
             if ($result < 1990 || $result > date('Y') + 10) {
                 return null; // Skip invalid years
             }
         }
-        
+
         if ($result < 0) {
             return null; // Skip negative values
         }
-        
+
         return $result;
     }
 
     private function validateCsvId(?string $value): ?string
     {
-        if ($value === null) return null;
-        
+        if ($value === null) {
+            return null;
+        }
+
         // CSV ID should be unique and not too long - truncate if needed
         if (strlen($value) > 100) {
             $value = substr($value, 0, 100);
         }
-        
+
         return $value;
     }
 
     private function validateIdentifier(?string $value, string $field): ?string
     {
-        if ($value === null) return null;
-        
+        if ($value === null) {
+            return null;
+        }
+
         // Truncate if too long instead of throwing error
         if (strlen($value) > 255) {
             $value = substr($value, 0, 255);
         }
-        
+
         return $value;
     }
 
     private function validatePostalCode(?string $value): ?string
     {
-        if ($value === null) return null;
-        
+        if ($value === null) {
+            return null;
+        }
+
         // Basic postal code validation
         $value = strtoupper(trim($value));
-        
+
         // Truncate if too long instead of throwing error
         if (strlen($value) > 20) {
             $value = substr($value, 0, 20);
         }
-        
+
         return $value;
     }
 
     private function validateString(?string $value, string $field): ?string
     {
-        if ($value === null) return null;
-        
+        if ($value === null) {
+            return null;
+        }
+
         // Check for reasonable string lengths
         $maxLengths = [
             'vendor_name' => 500,
@@ -443,18 +462,18 @@ class ProcurementContractSeeder extends Seeder
             'reporting_period' => 50,
             'working_procurement_id' => 255,
         ];
-        
+
         $defaultMaxLength = 2000; // More generous for text fields
         $maxLength = $maxLengths[$field] ?? $defaultMaxLength;
-        
+
         // Always truncate long values instead of throwing errors
         if (strlen($value) > $maxLength) {
             $value = substr($value, 0, $maxLength);
         }
-        
+
         // Clean invalid characters instead of throwing errors
         $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
-        
+
         return $value;
     }
 

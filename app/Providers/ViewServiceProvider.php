@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\ProcurementContract;
+use App\Models\Contract;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -24,7 +24,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         View::composer('layouts.app', function ($view) {
             $availableYears = Cache::remember('global_available_years', 3600, function () {
-                return ProcurementContract::selectRaw('DISTINCT contract_year')
+                return Contract::selectRaw('DISTINCT contract_year')
                     ->whereNotNull('contract_year')
                     ->orderByDesc('contract_year')
                     ->pluck('contract_year')
