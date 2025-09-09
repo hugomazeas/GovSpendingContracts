@@ -32,6 +32,10 @@
                         <i class="fas fa-building-columns text-sm"></i>
                         <span>{{ __('app.organizations') }}</span>
                     </a>
+                    <a href="{{ route('timeline.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                        <i class="fas fa-clock text-sm"></i>
+                        <span>Timeline</span>
+                    </a>
                 </nav>
 
                 <!-- Dark Mode Toggle -->
@@ -88,6 +92,10 @@
                 <a href="{{ route('organizations.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
                     <i class="fas fa-building-columns text-sm w-5"></i>
                     <span>{{ __('app.organizations') }}</span>
+                </a>
+                <a href="{{ route('timeline.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
+                    <i class="fas fa-clock text-sm w-5"></i>
+                    <span>Timeline</span>
                 </a>
             </div>
             

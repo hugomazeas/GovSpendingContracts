@@ -1,14 +1,17 @@
 <?php
 
 use App\Http\Controllers\Ajax\DashboardController;
+use App\Http\Controllers\Ajax\TimelineController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\TimelineController as MainTimelineController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 Route::get('/', [ContractController::class, 'index'])->name('dashboard');
 Route::get('/contracts', [ContractController::class, 'contracts'])->name('contracts.index');
+Route::get('/timeline', [MainTimelineController::class, 'index'])->name('timeline.index');
 Route::get('/contracts/data', [ContractController::class, 'data'])->name('contracts.data');
 Route::get('/contract/{contract}', [ContractController::class, 'show'])->name('contract.detail');
 
@@ -54,4 +57,11 @@ Route::prefix('ajax')->group(function () {
     Route::get('/vendor/{vendor}/organization/{organization}/spending-chart', [DashboardController::class, 'vendorOrganizationSpendingChart'])->name('ajax.vendor.organization.spending-chart');
     Route::get('/vendor/{vendor}/organization/{organization}/historical-totals', [DashboardController::class, 'vendorOrganizationHistoricalTotals'])->name('ajax.vendor.organization.historical-totals');
     Route::get('/vendor/{vendor}/historical-totals', [DashboardController::class, 'vendorHistoricalTotals'])->name('ajax.vendor.historical-totals');
+    
+    // Timeline AJAX Routes
+    Route::get('/timeline/data', [TimelineController::class, 'getData'])->name('ajax.timeline.data');
+    Route::get('/timeline/organizations', [TimelineController::class, 'getOrganizations'])->name('ajax.timeline.organizations');
+    Route::get('/timeline/date-range', [TimelineController::class, 'getDateRange'])->name('ajax.timeline.date-range');
+    Route::get('/timeline/summary', [TimelineController::class, 'getSummary'])->name('ajax.timeline.summary');
+    Route::get('/timeline/organization-data', [TimelineController::class, 'getOrganizationData'])->name('ajax.timeline.organization-data');
 });
