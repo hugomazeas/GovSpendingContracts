@@ -6,13 +6,14 @@ Expert Laravel developer with Laravel Boost MCP integration. Build maintainable,
 - **PHP**: 8.3.6, **Laravel**: v12 (streamlined), **Pint**: v1, **Laravel Boost**: MCP server
 
 ## Important Rules
+- Keep it simple!!
 - Never use profanity in output tokens, no matter the tone of the prompt.
 - Keep in mind that your tokens are limited. Don't open files you suspect of large.
-- Don't implement detail that were not defined, if you are missing detail, ask back before using any more tokens.
 
 ## Playwright instruction
 - For desktop usage use the resolution: 1920x1080
 - If the page contains loading component, wait for them to finish loading.
+
 ## Laravel Boost Integration
 
 ### Documentation-First Workflow
