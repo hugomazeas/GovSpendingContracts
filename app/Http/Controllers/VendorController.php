@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
+use App\Repositories\Contracts\ContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
 use App\Services\VendorDataService;
 use Illuminate\Contracts\View\View;
@@ -14,7 +14,7 @@ class VendorController extends Controller
 {
     public function __construct(
         private readonly ProcurementAnalyticsService $analyticsService,
-        private readonly ProcurementContractRepositoryInterface $contractRepository,
+        private readonly ContractRepositoryInterface $contractRepository,
         private readonly VendorDataService $vendorDataService
     ) {}
 

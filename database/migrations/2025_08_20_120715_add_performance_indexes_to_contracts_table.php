@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('procurement_contracts', function (Blueprint $table) {
+        Schema::table('contracts', function (Blueprint $table) {
             // Critical performance indexes based on query patterns
             $table->index('contract_year');
             $table->index('organization');
@@ -33,17 +33,17 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('procurement_contracts', function (Blueprint $table) {
-            $table->dropIndex(['procurement_contracts_contract_year_index']);
-            $table->dropIndex(['procurement_contracts_organization_index']);
-            $table->dropIndex(['procurement_contracts_vendor_name_index']);
-            $table->dropIndex(['procurement_contracts_total_contract_value_index']);
-            $table->dropIndex(['procurement_contracts_contract_date_index']);
-            $table->dropIndex(['procurement_contracts_contract_year_organization_index']);
-            $table->dropIndex(['procurement_contracts_contract_year_vendor_name_index']);
-            $table->dropIndex(['procurement_contracts_organization_contract_year_index']);
-            $table->dropIndex(['procurement_contracts_organization_vendor_name_index']);
-            $table->dropIndex(['procurement_contracts_contract_year_total_contract_value_index']);
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->dropIndex(['contracts_contract_year_index']);
+            $table->dropIndex(['contracts_organization_index']);
+            $table->dropIndex(['contracts_vendor_name_index']);
+            $table->dropIndex(['contracts_total_contract_value_index']);
+            $table->dropIndex(['contracts_contract_date_index']);
+            $table->dropIndex(['contracts_contract_year_organization_index']);
+            $table->dropIndex(['contracts_contract_year_vendor_name_index']);
+            $table->dropIndex(['contracts_organization_contract_year_index']);
+            $table->dropIndex(['contracts_organization_vendor_name_index']);
+            $table->dropIndex(['contracts_contract_year_total_contract_value_index']);
         });
     }
 };

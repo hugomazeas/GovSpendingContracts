@@ -49,7 +49,7 @@ seed: ## Seed database with current CSV data
 		echo "   Place your CSV file at data/data.csv before seeding"; \
 		exit 1; \
 	fi
-	php artisan db:seed --class=ProcurementContractSeeder --no-interaction
+	php artisan db:seed --class=ContractSeeder --no-interaction
 	@echo "✅ Database seeded successfully"
 
 seed-fresh: migrate-fresh seed ## Fresh migration + seed with new data
@@ -71,7 +71,7 @@ refresh-data: ## Quick refresh - truncate and reseed (preserves schema)
 		echo "❌ Error: data/data.csv not found"; \
 		exit 1; \
 	fi
-	php -r "require_once 'vendor/autoload.php'; \$$app = require_once 'bootstrap/app.php'; \$$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap(); App\Models\ProcurementContract::truncate();"
+	php -r "require_once 'vendor/autoload.php'; \$$app = require_once 'bootstrap/app.php'; \$$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap(); App\Models\Contract::truncate();"
 	$(MAKE) seed
 	@echo "✅ Data refreshed successfully"
 
@@ -135,9 +135,9 @@ status: ## Show application status and statistics
 			require_once 'vendor/autoload.php'; \
 			\$$app = require_once 'bootstrap/app.php'; \
 			\$$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap(); \
-			\$$count = App\Models\ProcurementContract::count(); \
-			\$$total = App\Models\ProcurementContract::sum('total_contract_value'); \
-			\$$vendors = App\Models\ProcurementContract::distinct('vendor_name')->count(); \
+			\$$count = App\Models\Contract::count(); \
+			\$$total = App\Models\Contract::sum('total_contract_value'); \
+			\$$vendors = App\Models\Contract::distinct('vendor_name')->count(); \
 			echo 'Total Contracts: ' . number_format(\$$count) . PHP_EOL; \
 			echo 'Total Value: $' . number_format(\$$total, 2) . PHP_EOL; \
 			echo 'Unique Vendors: ' . number_format(\$$vendors) . PHP_EOL; \

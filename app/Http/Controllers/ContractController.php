@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProcurementContract;
-use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
+use App\Models\Contract;
+use App\Repositories\Contracts\ContractRepositoryInterface;
 use App\Services\ProcurementAnalyticsService;
 use App\Services\VendorDataService;
 use Illuminate\Contracts\View\View;
@@ -11,11 +11,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
-class ProcurementContractController extends Controller
+class ContractController extends Controller
 {
     public function __construct(
         private readonly ProcurementAnalyticsService $analyticsService,
-        private readonly ProcurementContractRepositoryInterface $contractRepository,
+        private readonly ContractRepositoryInterface $contractRepository,
         private readonly VendorDataService $vendorDataService
     ) {}
 
@@ -46,7 +46,7 @@ class ProcurementContractController extends Controller
         return view('procurement-contracts.index', compact('availableYears'));
     }
 
-    public function show(ProcurementContract $contract): View
+    public function show(Contract $contract): View
     {
         return view('procurement-contracts.show', compact('contract'));
     }

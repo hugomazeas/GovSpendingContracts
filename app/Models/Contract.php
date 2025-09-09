@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProcurementContract extends Model
+class Contract extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProcurementContractFactory> */
+    /** @use HasFactory<\Database\Factories\ContractFactory> */
     use HasFactory;
+
+    protected $table = 'procurement_contracts';
 
     protected $fillable = [
         'reference_number',

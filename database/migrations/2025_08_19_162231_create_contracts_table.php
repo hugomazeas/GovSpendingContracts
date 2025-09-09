@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('procurement_contracts', function (Blueprint $table) {
+        Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->string('reference_number')->index()->nullable();
             $table->string('procurement_identification_number')->nullable()->index();
@@ -67,6 +67,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('procurement_contracts');
+        Schema::dropIfExists('contracts');
     }
 };

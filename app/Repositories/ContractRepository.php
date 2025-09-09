@@ -2,16 +2,16 @@
 
 namespace App\Repositories;
 
-use App\Models\ProcurementContract;
-use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
+use App\Models\Contract;
+use App\Repositories\Contracts\ContractRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
-class ProcurementContractRepository implements ProcurementContractRepositoryInterface
+class ContractRepository implements ContractRepositoryInterface
 {
     public function getDataTableData(Request $request): array
     {
-        $query = ProcurementContract::query();
+        $query = Contract::query();
 
         $selectedYear = $request->get('year', date('Y'));
         $query->where('contract_year', $selectedYear);
@@ -27,7 +27,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
             });
         }
 
-        $totalRecords = ProcurementContract::where('contract_year', $selectedYear)->count();
+        $totalRecords = Contract::where('contract_year', $selectedYear)->count();
         $filteredRecords = $query->count();
 
         if ($request->has('order')) {
@@ -63,7 +63,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getVendorDataTableData(string $vendorName, Request $request): array
     {
-        $query = ProcurementContract::query()->where('vendor_name', $vendorName);
+        $query = Contract::query()->where('vendor_name', $vendorName);
 
         $selectedYear = $request->get('year');
         if ($selectedYear) {
@@ -80,7 +80,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
             });
         }
 
-        $totalQuery = ProcurementContract::where('vendor_name', $vendorName);
+        $totalQuery = Contract::where('vendor_name', $vendorName);
         if ($selectedYear) {
             $totalQuery->where('contract_year', $selectedYear);
         }
@@ -120,7 +120,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getOrganizationDataTableData(string $organization, Request $request): array
     {
-        $query = ProcurementContract::query()->where('organization', $organization);
+        $query = Contract::query()->where('organization', $organization);
 
         $selectedYear = $request->get('year');
         if ($selectedYear) {
@@ -136,7 +136,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
             });
         }
 
-        $totalQuery = ProcurementContract::where('organization', $organization);
+        $totalQuery = Contract::where('organization', $organization);
         if ($selectedYear) {
             $totalQuery->where('contract_year', $selectedYear);
         }
@@ -176,7 +176,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getVendorOrganizationDataTableData(string $vendorName, string $organization, Request $request): array
     {
-        $query = ProcurementContract::query()
+        $query = Contract::query()
             ->where('vendor_name', $vendorName)
             ->where('organization', $organization);
 
@@ -194,7 +194,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
             });
         }
 
-        $totalQuery = ProcurementContract::query()
+        $totalQuery = Contract::query()
             ->where('vendor_name', $vendorName)
             ->where('organization', $organization);
         if ($selectedYear) {
@@ -235,7 +235,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getSpendingByYear(?string $organization = null): Collection
     {
-        $query = ProcurementContract::selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
+        $query = Contract::selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
             ->whereNotNull('contract_year')
             ->whereNotNull('total_contract_value');
 
@@ -250,7 +250,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getSpendingByYearForVendor(string $vendorName): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendorName)
+        return Contract::where('vendor_name', $vendorName)
             ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->whereNotNull('contract_year')
             ->whereNotNull('total_contract_value')
@@ -265,14 +265,14 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
         $lastThreeYears = [$currentYear - 1, $currentYear - 2, $currentYear - 3];
         $fourthYear = $currentYear - 4;
 
-        return ProcurementContract::selectRaw("
+        return Contract::selectRaw('
                 organization,
                 SUM(CASE WHEN contract_year = ? THEN total_contract_value ELSE 0 END) as spending_year_1,
                 SUM(CASE WHEN contract_year = ? THEN total_contract_value ELSE 0 END) as spending_year_2,
                 SUM(CASE WHEN contract_year = ? THEN total_contract_value ELSE 0 END) as spending_year_3,
                 SUM(CASE WHEN contract_year = ? THEN total_contract_value ELSE 0 END) as spending_year_4,
                 SUM(total_contract_value) as total_spending
-            ", [$lastThreeYears[0], $lastThreeYears[1], $lastThreeYears[2], $fourthYear])
+            ', [$lastThreeYears[0], $lastThreeYears[1], $lastThreeYears[2], $fourthYear])
             ->whereNotNull('organization')
             ->whereNotNull('total_contract_value')
             ->whereIn('contract_year', $years)
@@ -282,7 +282,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getOrganizationsPieChartData(string $year): array
     {
-        $topOrganizations = ProcurementContract::where('contract_year', $year)
+        $topOrganizations = Contract::where('contract_year', $year)
             ->whereNotNull('organization')
             ->whereNotNull('total_contract_value')
             ->selectRaw('organization, SUM(total_contract_value) as total_spending')
@@ -291,7 +291,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
             ->limit(10)
             ->get();
 
-        $totalYearSpending = ProcurementContract::where('contract_year', $year)
+        $totalYearSpending = Contract::where('contract_year', $year)
             ->whereNotNull('total_contract_value')
             ->sum('total_contract_value');
 
@@ -303,7 +303,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getVendorHistoricalContracts(string $vendorName): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendorName)
+        return Contract::where('vendor_name', $vendorName)
             ->whereNotNull('total_contract_value')
             ->select('total_contract_value', 'contract_year')
             ->get();
@@ -311,7 +311,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getOrganizationHistoricalContracts(string $organization): Collection
     {
-        return ProcurementContract::where('organization', $organization)
+        return Contract::where('organization', $organization)
             ->whereNotNull('total_contract_value')
             ->select('total_contract_value', 'contract_year')
             ->get();
@@ -319,7 +319,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getVendorOrganizationHistoricalContracts(string $vendorName, string $organization): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendorName)
+        return Contract::where('vendor_name', $vendorName)
             ->where('organization', $organization)
             ->whereNotNull('total_contract_value')
             ->select('total_contract_value', 'contract_year')
@@ -328,7 +328,7 @@ class ProcurementContractRepository implements ProcurementContractRepositoryInte
 
     public function getAllHistoricalContracts(): Collection
     {
-        return ProcurementContract::whereNotNull('total_contract_value')
+        return Contract::whereNotNull('total_contract_value')
             ->select('total_contract_value', 'contract_year')
             ->get();
     }

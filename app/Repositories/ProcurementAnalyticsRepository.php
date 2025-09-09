@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\ProcurementContract;
+use App\Models\Contract;
 use App\Repositories\Contracts\ProcurementAnalyticsRepositoryInterface;
 use Illuminate\Support\Collection;
 
@@ -10,7 +10,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 {
     public function getGeneralStatistics(int $year): array
     {
-        $stats = ProcurementContract::where('contract_year', $year)
+        $stats = Contract::where('contract_year', $year)
             ->selectRaw('
                 COUNT(*) as total_contracts,
                 SUM(total_contract_value) as total_value,
@@ -31,7 +31,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getOrganizationStats(string $organization, int $year): array
     {
-        $stats = ProcurementContract::where('organization', $organization)
+        $stats = Contract::where('organization', $organization)
             ->where('contract_year', $year)
             ->selectRaw('
                 COUNT(*) as total_contracts,
@@ -58,7 +58,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopVendorsForOrganization(string $organization, int $year): Collection
     {
-        return ProcurementContract::where('organization', $organization)
+        return Contract::where('organization', $organization)
             ->where('contract_year', $year)
             ->selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->whereNotNull('vendor_name')
@@ -71,7 +71,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopContractsForOrganization(string $organization, int $year): Collection
     {
-        return ProcurementContract::where('organization', $organization)
+        return Contract::where('organization', $organization)
             ->where('contract_year', $year)
             ->whereNotNull('total_contract_value')
             ->orderByDesc('total_contract_value')
@@ -81,7 +81,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getContractsByYearForOrganization(string $organization): Collection
     {
-        return ProcurementContract::where('organization', $organization)
+        return Contract::where('organization', $organization)
             ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
             ->whereNotNull('contract_year')
             ->whereNotNull('total_contract_value')
@@ -92,7 +92,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getVendorStats(string $vendor, int $year): array
     {
-        $stats = ProcurementContract::where('vendor_name', $vendor)
+        $stats = Contract::where('vendor_name', $vendor)
             ->where('contract_year', $year)
             ->selectRaw('
                 COUNT(*) as total_contracts,
@@ -119,7 +119,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopMinistersForVendor(string $vendor, int $year): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendor)
+        return Contract::where('vendor_name', $vendor)
             ->where('contract_year', $year)
             ->selectRaw('organization, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->whereNotNull('organization')
@@ -132,7 +132,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getContractsByYearForVendor(string $vendor): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendor)
+        return Contract::where('vendor_name', $vendor)
             ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->whereNotNull('contract_year')
             ->whereNotNull('total_contract_value')
@@ -143,7 +143,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopVendorsByCount(int $year): Collection
     {
-        return ProcurementContract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
+        return Contract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->where('contract_year', $year)
             ->whereNotNull('vendor_name')
             ->groupBy('vendor_name')
@@ -154,7 +154,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopVendorsByValue(int $year): Collection
     {
-        return ProcurementContract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
+        return Contract::selectRaw('vendor_name, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->where('contract_year', $year)
             ->whereNotNull('vendor_name')
             ->whereNotNull('total_contract_value')
@@ -166,7 +166,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopOrganizationsBySpending(int $year): Collection
     {
-        return ProcurementContract::selectRaw('organization, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
+        return Contract::selectRaw('organization, COUNT(*) as contract_count, SUM(total_contract_value) as total_spending')
             ->where('contract_year', $year)
             ->whereNotNull('organization')
             ->whereNotNull('total_contract_value')
@@ -178,7 +178,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getTopVendorCountriesByValue(int $year): Collection
     {
-        return ProcurementContract::selectRaw('country_of_vendor, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
+        return Contract::selectRaw('country_of_vendor, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->where('contract_year', $year)
             ->whereNotNull('country_of_vendor')
             ->where('country_of_vendor', '!=', '')
@@ -191,7 +191,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getAvailableYears(): Collection
     {
-        return ProcurementContract::selectRaw('DISTINCT contract_year')
+        return Contract::selectRaw('DISTINCT contract_year')
             ->whereNotNull('contract_year')
             ->orderByDesc('contract_year')
             ->pluck('contract_year');
@@ -199,7 +199,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getAvailableYearsForOrganization(string $organization): Collection
     {
-        return ProcurementContract::where('organization', $organization)
+        return Contract::where('organization', $organization)
             ->selectRaw('DISTINCT contract_year')
             ->whereNotNull('contract_year')
             ->orderByDesc('contract_year')
@@ -208,7 +208,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getAvailableYearsForVendor(string $vendor): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendor)
+        return Contract::where('vendor_name', $vendor)
             ->selectRaw('DISTINCT contract_year')
             ->whereNotNull('contract_year')
             ->orderByDesc('contract_year')
@@ -217,7 +217,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getAvailableYearsForVendorOrganization(string $vendor, string $organization): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendor)
+        return Contract::where('vendor_name', $vendor)
             ->where('organization', $organization)
             ->selectRaw('DISTINCT contract_year')
             ->whereNotNull('contract_year')
@@ -227,7 +227,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getVendorOrganizationStats(string $vendor, string $organization, int $year): array
     {
-        $stats = ProcurementContract::where('vendor_name', $vendor)
+        $stats = Contract::where('vendor_name', $vendor)
             ->where('organization', $organization)
             ->where('contract_year', $year)
             ->selectRaw('
@@ -253,7 +253,7 @@ class ProcurementAnalyticsRepository implements ProcurementAnalyticsRepositoryIn
 
     public function getVendorOrganizationSpendingOverTime(string $vendor, string $organization): Collection
     {
-        return ProcurementContract::where('vendor_name', $vendor)
+        return Contract::where('vendor_name', $vendor)
             ->where('organization', $organization)
             ->selectRaw('contract_year, COUNT(*) as contract_count, SUM(total_contract_value) as total_value')
             ->whereNotNull('contract_year')

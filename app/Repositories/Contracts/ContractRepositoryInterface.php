@@ -5,7 +5,7 @@ namespace App\Repositories\Contracts;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
-interface ProcurementContractRepositoryInterface
+interface ContractRepositoryInterface
 {
     public function getDataTableData(Request $request): array;
 

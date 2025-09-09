@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Ajax;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Contracts\ProcurementContractRepositoryInterface;
+use App\Repositories\Contracts\ContractRepositoryInterface;
 use App\Services\DashboardDataService;
 use App\Services\ProcurementAnalyticsService;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +14,7 @@ class DashboardController extends Controller
 {
     public function __construct(
         private readonly ProcurementAnalyticsService $analyticsService,
-        private readonly ProcurementContractRepositoryInterface $contractRepository,
+        private readonly ContractRepositoryInterface $contractRepository,
         private readonly DashboardDataService $dashboardDataService
     ) {}
 
