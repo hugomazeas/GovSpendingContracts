@@ -41,12 +41,14 @@ jobs:
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
+            - Long-term maintanability of features
             - Security concerns
-            - Test coverage
             
-            Do not resume the goal of the PR. Do no kind of resume.
+            Do not resume the goal of the PR. Do no kind of resume. Do not do suggestion, it's not your role. Just highlight the problem. 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
+            With emojis, colorgrade the severity of the violation. Don't count the violation (1. 2. 3. ...) Just a short title per section.
+            
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
           
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
