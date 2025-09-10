@@ -6,6 +6,8 @@ use App\Repositories\ContractRepository;
 use App\Repositories\Contracts\ContractRepositoryInterface;
 use App\Repositories\Contracts\ProcurementAnalyticsRepositoryInterface;
 use App\Repositories\ProcurementAnalyticsRepository;
+use App\Repositories\TimelineRepository;
+use App\Repositories\TimelineRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             ProcurementAnalyticsRepositoryInterface::class,
             ProcurementAnalyticsRepository::class
+        );
+
+        $this->app->bind(
+            TimelineRepositoryInterface::class,
+            TimelineRepository::class
         );
     }
 

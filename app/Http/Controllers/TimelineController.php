@@ -17,14 +17,6 @@ class TimelineController extends Controller
 
     public function data(): JsonResponse
     {
-        $minimum_contract_value = config('timeline.minimum_contract_value');
-        $organizations = $this->timelineService->getTopOrganizations();
-        $organizationNames = $organizations->pluck('organization')->toArray();
-        $timelineData = $this->timelineService->getTimelineData($organizationNames, $minimum_contract_value);
-
-        return response()->json([
-            'organizations' => $organizations,
-            'timeline' => $timelineData
-        ]);
+        return response()->json($this->timelineService->getFullTimelineData());
     }
 }
