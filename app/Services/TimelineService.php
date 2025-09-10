@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Contract;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class TimelineService
@@ -11,14 +12,17 @@ class TimelineService
     public function getTopOrganizations(): Collection
     {
         $limit = config('timeline.top_organizations_count');
-        return Contract::query()
-            ->select('organization', DB::raw('SUM(total_contract_value) as total_value'))
-            ->whereNotNull('organization')
-            ->where('organization', '!=', '')
-            ->groupBy('organization')
-            ->orderByDesc('total_value')
-            ->limit($limit)
-            ->get();
+        
+        return Cache::remember('timeline_top_organizations', 3600, function () use ($limit) {
+            return Contract::query()
+                ->select('organization', DB::raw('SUM(total_contract_value) as total_value'))
+                ->whereNotNull('organization')
+                ->where('organization', '!=', '')
+                ->groupBy('organization')
+                ->orderByDesc('total_value')
+                ->limit($limit)
+                ->get();
+        });
     }
 
     public function getTimelineData(array $organizations, int $minimum_contract_value): Collection
@@ -26,11 +30,11 @@ class TimelineService
         $years = config('timeline.years_to_display');
         $currentYear = now()->year;
         $startYear = $currentYear - $years;
-
-        $contracts = collect();
-
-        foreach ($organizations as $organization) {
-            $orgContracts = Contract::query()
+        
+        $cacheKey = 'timeline_data_' . md5(implode(',', $organizations) . $minimum_contract_value . $years);
+        
+        return Cache::remember($cacheKey, 1800, function () use ($organizations, $minimum_contract_value, $startYear) {
+            return Contract::query()
                 ->select([
                     'organization',
                     'contract_date',
@@ -40,31 +44,25 @@ class TimelineService
                     'description_of_work_english',
                     'vendor_name'
                 ])
-                ->where('organization', $organization)
+                ->whereIn('organization', $organizations)
                 ->where('contract_year', '>=', $startYear)
                 ->whereNotNull('contract_date')
                 ->where('total_contract_value', '>', $minimum_contract_value)
-                ->where('contract_period_start_date', '>=', '1900-01-01')
+                ->where('contract_period_start_date', '>=', '1999-01-01')
                 ->orderBy('total_contract_value', 'desc')
-                ->limit(20)
-                ->get();
-
-            $contracts = $contracts->merge($orgContracts);
-        }
-
-        return $contracts
-            ->sortBy('contract_date')
-            ->values()
-            ->map(function ($contract) {
-                return [
-                    'organization' => $contract->organization,
-                    'start' => $contract->contract_period_start_date?->format('Y-m-d') ?? $contract->contract_date->format('Y-m-d'),
-                    'end' => $contract->contract_period_end_date?->format('Y-m-d') ?? $contract->contract_date->format('Y-m-d'),
-                    'value' => (float) $contract->total_contract_value,
-                    'description' => substr($contract->description_of_work_english ?? '', 0, 100),
-                    'vendor' => $contract->vendor_name,
-                    'type' => $contract->contract_period_start_date && $contract->contract_period_end_date ? 'period' : 'event'
-                ];
-            });
+                ->limit(400)
+                ->get()
+                ->map(function ($contract) {
+                    return [
+                        'organization' => $contract->organization,
+                        'start' => $contract->contract_period_start_date?->format('Y-m-d') ?? $contract->contract_date->format('Y-m-d'),
+                        'end' => $contract->contract_period_end_date?->format('Y-m-d') ?? $contract->contract_date->format('Y-m-d'),
+                        'value' => (float) $contract->total_contract_value,
+                        'description' => substr($contract->description_of_work_english ?? '', 0, 100),
+                        'vendor' => $contract->vendor_name,
+                        'type' => $contract->contract_period_start_date && $contract->contract_period_end_date ? 'period' : 'event'
+                    ];
+                });
+        });
     }
 }

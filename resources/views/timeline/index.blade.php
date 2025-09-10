@@ -46,6 +46,12 @@ function createTimeline(data) {
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom);
 
+    const clip = svg.append('defs').append('clipPath')
+        .attr('id', 'clip')
+        .append('rect')
+        .attr('width', width)
+        .attr('height', height);
+
     const g = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -77,27 +83,37 @@ function createTimeline(data) {
             '#3730a3', '#a16207', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444'
         ]);
 
-    const xAxis = d3.axisBottom(xScale)
-        .tickFormat(d3.timeFormat('%Y'));
+    const xAxis = d3.axisBottom(xScale);
 
     const yAxis = d3.axisLeft(yScale);
 
-    g.append('g')
+    const gX = g.append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(0,${height})`)
-        .call(xAxis)
-        .selectAll('text')
+        .call(xAxis);
+
+    gX.selectAll('text')
         .style('font-size', '12px')
         .style('fill', '#4b5563');
 
-    g.append('g')
+    const gY = g.append('g')
         .attr('class', 'y-axis')
-        .call(yAxis)
-        .selectAll('text')
+        .call(yAxis);
+
+    gY.selectAll('text')
         .style('font-size', '12px')
         .style('fill', '#4b5563');
 
-    g.selectAll('.lane')
+    const zoomContainer = g.append('g')
+        .attr('clip-path', 'url(#clip)');
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.01, 50])
+        .translateExtent([[0, 0], [width, height]])
+        .extent([[0, 0], [width, height]])
+        .on('zoom', handleZoom);
+
+    const lanes = zoomContainer.selectAll('.lane')
         .data(organizations)
         .enter()
         .append('line')
@@ -120,7 +136,7 @@ function createTimeline(data) {
         .style('pointer-events', 'none')
         .style('opacity', 0);
 
-    const items = g.selectAll('.timeline-item')
+    const items = zoomContainer.selectAll('.timeline-item')
         .data(timelineData)
         .enter()
         .append('g')
@@ -171,7 +187,7 @@ function createTimeline(data) {
     });
 
     const currentYear = new Date();
-    g.append('line')
+    const currentYearLine = zoomContainer.append('line')
         .attr('class', 'current-year-line')
         .attr('x1', xScale(currentYear))
         .attr('x2', xScale(currentYear))
@@ -181,7 +197,7 @@ function createTimeline(data) {
         .style('stroke-width', 2)
         .style('stroke-dasharray', '5,5');
 
-    g.append('text')
+    const currentYearText = g.append('text')
         .attr('x', xScale(currentYear))
         .attr('y', -15)
         .attr('text-anchor', 'middle')
@@ -198,6 +214,33 @@ function createTimeline(data) {
         .style('font-weight', 'bold')
         .style('fill', '#1f2937')
         .text('Top 20 Organizations Contract Timeline (Last 20 Years)');
+
+    svg.call(zoom);
+
+    function handleZoom(event) {
+        const { transform } = event;
+
+        const newXScale = transform.rescaleX(xScale);
+
+        gX.call(xAxis.scale(newXScale));
+
+        items.selectAll('rect')
+            .attr('x', d => newXScale(d.start))
+            .attr('width', d => Math.max(1, newXScale(d.end) - newXScale(d.start)));
+
+        items.selectAll('circle')
+            .attr('cx', d => newXScale(d.start));
+
+        lanes.attr('x1', newXScale.range()[0])
+            .attr('x2', newXScale.range()[1]);
+
+        currentYearLine
+            .attr('x1', newXScale(currentYear))
+            .attr('x2', newXScale(currentYear));
+
+        currentYearText
+            .attr('x', newXScale(currentYear));
+    }
 }
 </script>
 @endsection
