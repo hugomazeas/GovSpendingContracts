@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function createTimeline(data) {
+    console.log('Timeline data received:');
+    console.log('First contract:', data.timeline[0]);
+    console.log('Second contract:', data.timeline[1]);
+    
     const container = d3.select('#timeline-chart');
     container.selectAll('*').remove();
 
@@ -66,26 +70,87 @@ function createTimeline(data) {
         d.end = parseDate(d.end);
     });
 
+    // Add position (lane) to each contract to handle overlaps
+    const enrichedData = [];
+    const maxLanesPerOrg = 5; // Limit sublanes to keep chart reasonable
+    
+    organizations.forEach(org => {
+        const orgContracts = timelineData.filter(d => d.organization === org);
+        const lanes = [];
+        
+        orgContracts.forEach(contract => {
+            let laneIndex = 0;
+            // Find first available lane, but limit to maxLanesPerOrg
+            while (laneIndex < lanes.length && laneIndex < maxLanesPerOrg) {
+                const hasOverlap = lanes[laneIndex].some(existing => {
+                    return (contract.start <= existing.end && contract.end >= existing.start);
+                });
+                if (!hasOverlap) break;
+                laneIndex++;
+            }
+            // Create new lane if needed and under limit
+            if (laneIndex === lanes.length && laneIndex < maxLanesPerOrg) {
+                lanes.push([]);
+            }
+            // If we're over limit, use the last lane (overlaps allowed)
+            if (laneIndex >= maxLanesPerOrg) {
+                laneIndex = maxLanesPerOrg - 1;
+            }
+            
+            if (!lanes[laneIndex]) lanes[laneIndex] = [];
+            lanes[laneIndex].push(contract);
+            
+            enrichedData.push({
+                ...contract,
+                pos: `${org}-${laneIndex}`,
+                orgIndex: organizations.indexOf(org),
+                laneIndex: laneIndex,
+                id: contract.id
+            });
+        });
+    });
+
     const xScale = d3.scaleTime()
         .domain(d3.extent([...timelineData.map(d => d.start), ...timelineData.map(d => d.end)]))
         .range([0, width]);
 
-    const yScale = d3.scaleBand()
-        .domain(organizations)
-        .range([0, height])
-        .padding(0.1);
+    // Create unique positions for all contract lanes
+    const positions = enrichedData.map(d => d.pos);
+    const uniquePositions = [...new Set(positions)];
 
-    const colorScale = d3.scaleOrdinal()
-        .range([
+    const yScale = d3.scaleBand()
+        .domain(uniquePositions)
+        .range([0, height])
+        .padding(0.02);
+
+    // Hash function to generate consistent colors for vendors
+    function hashString(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash);
+    }
+    
+    function getVendorColor(vendor) {
+        const colors = [
             '#e11d48', '#7c3aed', '#059669', '#dc2626', '#2563eb', '#ea580c',
             '#be185d', '#7c2d12', '#0369a1', '#065f46', '#7e22ce', '#991b1b',
-            '#1e40af', '#b45309', '#92400e', '#6b21a8', '#166534', '#dc2626',
-            '#3730a3', '#a16207', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444'
-        ]);
+            '#1e40af', '#b45309', '#92400e', '#6b21a8', '#166534', '#f59e0b', 
+            '#3730a3', '#a16207', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4',
+            '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#84cc16'
+        ];
+        const hash = hashString(vendor || 'unknown');
+        return colors[hash % colors.length];
+    }
 
     const xAxis = d3.axisBottom(xScale);
 
-    const yAxis = d3.axisLeft(yScale);
+    // Custom Y axis showing organization names
+    const yAxis = d3.axisLeft(yScale)
+        .tickFormat(d => d.split('-')[0]); // Show only organization name, not lane number
 
     const gX = g.append('g')
         .attr('class', 'x-axis')
@@ -101,7 +166,7 @@ function createTimeline(data) {
         .call(yAxis);
 
     gY.selectAll('text')
-        .style('font-size', '12px')
+        .style('font-size', '10px')
         .style('fill', '#4b5563');
 
     const zoomContainer = g.append('g')
@@ -113,8 +178,9 @@ function createTimeline(data) {
         .extent([[0, 0], [width, height]])
         .on('zoom', handleZoom);
 
+    // Draw lanes for each position
     const lanes = zoomContainer.selectAll('.lane')
-        .data(organizations)
+        .data(uniquePositions)
         .enter()
         .append('line')
         .attr('class', 'lane')
@@ -122,7 +188,7 @@ function createTimeline(data) {
         .attr('x2', width)
         .attr('y1', d => yScale(d) + yScale.bandwidth() / 2)
         .attr('y2', d => yScale(d) + yScale.bandwidth() / 2)
-        .style('stroke', '#e5e7eb')
+        .style('stroke', '#f3f4f6')
         .style('stroke-width', 1);
 
     const tooltip = d3.select('body').append('div')
@@ -137,54 +203,65 @@ function createTimeline(data) {
         .style('opacity', 0);
 
     const items = zoomContainer.selectAll('.timeline-item')
-        .data(timelineData)
+        .data(enrichedData)
         .enter()
         .append('g')
         .attr('class', 'timeline-item');
 
     items.each(function(d) {
         const item = d3.select(this);
-        const y = yScale(d.organization) + yScale.bandwidth() / 2;
+        const y = yScale(d.pos) + yScale.bandwidth() / 2;
 
-        const contractColor = colorScale(d.organization + d.vendor + d.start);
+        const contractColor = getVendorColor(d.vendor);
 
         if (d.type === 'period') {
             item.append('rect')
                 .attr('x', xScale(d.start))
-                .attr('y', y - 15)
+                .attr('y', y - 8)
                 .attr('width', Math.max(2, xScale(d.end) - xScale(d.start)))
-                .attr('height', 30)
+                .attr('height', 16)
+                .attr('rx', 2)
                 .style('fill', contractColor)
                 .style('opacity', 0.8)
-                .style('stroke', '#1f2937')
-                .style('stroke-width', 1);
+                .style('stroke', '#374151')
+                .style('stroke-width', 1)
+                .style('cursor', 'pointer');
         } else {
             item.append('circle')
                 .attr('cx', xScale(d.start))
                 .attr('cy', y)
-                .attr('r', 6)
+                .attr('r', 4)
                 .style('fill', contractColor)
-                .style('stroke', '#1f2937')
-                .style('stroke-width', 2);
+                .style('stroke', '#374151')
+                .style('stroke-width', 1.5)
+                .style('cursor', 'pointer');
         }
     });
 
-    items.on('mouseover', function(event, d) {
-        const value = d.value ? `$${(d.value / 1000000).toFixed(2)}M` : 'N/A';
-        tooltip.transition().duration(200).style('opacity', 1);
-        tooltip.html(`
-            <strong>${d.organization}</strong><br/>
-            Vendor: ${d.vendor}<br/>
-            Value: ${value}<br/>
-            Date: ${formatDate(d.start)}${d.type === 'period' ? ' - ' + formatDate(d.end) : ''}<br/>
-            ${d.description ? d.description.substring(0, 100) + '...' : ''}
-        `)
-        .style('left', (event.pageX + 10) + 'px')
-        .style('top', (event.pageY - 28) + 'px');
-    })
-    .on('mouseout', function() {
-        tooltip.transition().duration(500).style('opacity', 0);
-    });
+    items
+        .on('mouseover', function(event, d) {
+            const value = d.value ? `$${(d.value / 1000000).toFixed(2)}M` : 'N/A';
+            tooltip.transition().duration(200).style('opacity', 1);
+            tooltip.html(`
+                <strong>${d.organization}</strong><br/>
+                Vendor: ${d.vendor}<br/>
+                Value: ${value}<br/>
+                Date: ${formatDate(d.start)}${d.type === 'period' ? ' - ' + formatDate(d.end) : ''}<br/>
+                ${d.description ? d.description.substring(0, 100) + '...' : ''}<br/>
+                <em style="color: #94a3b8;">Click to view details</em>
+            `)
+            .style('left', (event.pageX + 10) + 'px')
+            .style('top', (event.pageY - 28) + 'px');
+        })
+        .on('mouseout', function(event, d) {
+            tooltip.transition().duration(500).style('opacity', 0);
+        })
+        .on('click', function(event, d) {
+            console.log('Contract clicked:', d);
+            if (d && d.id) {
+                window.location.href = `/contract/${d.id}`;
+            }
+        });
 
     const currentYear = new Date();
     const currentYearLine = zoomContainer.append('line')
