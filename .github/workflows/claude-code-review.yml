@@ -37,12 +37,13 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            Please review this pull request and provide feedback on:
+            Please review this pull request and provide feedback on (negative feedback only):
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
             - Security concerns
             - Test coverage
+            
             Do not resume the goal of the PR. Do no kind of resume.
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
