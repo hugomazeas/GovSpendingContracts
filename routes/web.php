@@ -1,14 +1,18 @@
 <?php
 
 use App\Http\Controllers\Ajax\DashboardController;
+use App\Http\Controllers\Ajax\TimelineController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\TimelineController as MainTimelineController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 Route::get('/', [ContractController::class, 'index'])->name('dashboard');
 Route::get('/contracts', [ContractController::class, 'contracts'])->name('contracts.index');
+Route::get('/timeline', [MainTimelineController::class, 'index'])->name('timeline.index');
+Route::get('/timeline/data', [MainTimelineController::class, 'data'])->name('timeline.data');
 Route::get('/contracts/data', [ContractController::class, 'data'])->name('contracts.data');
 Route::get('/contract/{contract}', [ContractController::class, 'show'])->name('contract.detail');
 
