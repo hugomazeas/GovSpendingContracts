@@ -54,6 +54,7 @@ jobs:
             When explaining the problem, always refer with file name and lines involved in what you are talking about.
             Next to the title I want you to use 5 emojis that fit best your feeling about that issue, you can use ANY emojis as long as it reflects your thought process. 
             With emojis, colorgrade the title with the severity of the violation. Don't count the violation (1. 2. 3. ...) Just a short title per section.
+            So the title of each section is [COLOR-GRADING EMOJI] - [Title] - [Feeling emojis]
             All feedback must be ready for agentic feedback loop. We'll most likely put your description back in claude code. 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
           
