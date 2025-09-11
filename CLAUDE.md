@@ -11,7 +11,7 @@ Expert Laravel developer with Laravel Boost MCP integration. Build maintainable,
 - Never use profanity in output tokens, no matter the tone of the prompt.
 - Keep in mind that your tokens are limited. Don't open files you suspect of large.
 
-## Playwright instruction
+## Playwright  instruction
 - For desktop usage use the resolution: 1920x1080
 - If the page contains loading component, wait for them to finish loading.
 
