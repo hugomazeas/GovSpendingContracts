@@ -10,7 +10,7 @@
         <div class="text-3xl font-bold text-blue-600 mb-2">
             {{ number_format($stats['total_contracts']) }}
         </div>
-        <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
+        <div class="text-gray-600 dark:text-neutral-300 text-sm font-medium uppercase tracking-wide">
             {{ __('app.total_contracts') }}
         </div>
     </div>
@@ -23,7 +23,7 @@
         <div class="text-3xl font-bold text-green-600 mb-2">
             @currency($stats['total_value'])
         </div>
-        <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
+        <div class="text-gray-600 dark:text-neutral-300 text-sm font-medium uppercase tracking-wide">
             {{ __('app.total_value') }}
         </div>
     </div>
@@ -36,7 +36,7 @@
         <div class="text-3xl font-bold text-indigo-600 mb-2">
             {{ number_format($stats['unique_vendors']) }}
         </div>
-        <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
+        <div class="text-gray-600 dark:text-neutral-300 text-sm font-medium uppercase tracking-wide">
             {{ __('app.unique_vendors') }}
         </div>
     </div>
@@ -49,7 +49,7 @@
         <div class="text-3xl font-bold text-amber-600 mb-2">
             @currencyAvg($stats['avg_contract_value'])
         </div>
-        <div class="text-gray-600 text-sm font-medium uppercase tracking-wide">
+        <div class="text-gray-600 dark:text-neutral-300 text-sm font-medium uppercase tracking-wide">
             {{ __('app.avg_contract_value') }}
         </div>
     </div>

@@ -4,12 +4,12 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
-    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-        <h2 class="text-2xl font-bold text-neutral-900 mb-6">Organization Contract Timeline</h2>
+    <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-600 p-6">
+        <h2 class="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Organization Contract Timeline</h2>
 
         <div id="loading" class="text-center py-12">
             <i class="fas fa-spinner fa-spin text-4xl text-primary-500 mb-4"></i>
-            <p class="text-neutral-600">Loading timeline data...</p>
+            <p class="text-neutral-600 dark:text-neutral-300">Loading timeline data...</p>
         </div>
 
         <div id="timeline-container" class="hidden">
