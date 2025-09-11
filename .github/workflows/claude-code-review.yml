@@ -43,11 +43,16 @@ jobs:
             - Performance considerations
             - Long-term maintanability of features
             - Security concerns
-            
+            Flag if: 
+            - SOLID Violation
+            - Reinventing the wheel
+            - Inappropriate abstractions
+            - Unhandled edge cases
             Do not resume the goal of the PR. Do no kind of resume. Do not do suggestion, it's not your role. Just highlight the problem. 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
-            With emojis, colorgrade the severity of the violation. Don't count the violation (1. 2. 3. ...) Just a short title per section.
+            Next to the title I want you to use 5 emojis that fit best your feeling about that issue, you can use ANY emojis as long as it reflects your thought process. 
+            Colorgrade the title with the severity of the violation. Don't count the violation (1. 2. 3. ...) Just a short title per section.
             
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
           
