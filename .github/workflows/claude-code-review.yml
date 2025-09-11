@@ -48,6 +48,8 @@ jobs:
             - Reinventing the wheel
             - Inappropriate abstractions
             - Unhandled edge cases
+
+            Do not be alarmist, be moderate in your evaluation of severity. 
             Start with a one liner sentence of how you feel towards this PR overall. 
             Do not resume the goal of the PR. Do no kind of resume. Do not do suggestion, it's not your role. Just highlight the problem. 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
