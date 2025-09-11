@@ -48,12 +48,13 @@ jobs:
             - Reinventing the wheel
             - Inappropriate abstractions
             - Unhandled edge cases
+            Start with a one liner sentence of how you feel towards this PR overall. 
             Do not resume the goal of the PR. Do no kind of resume. Do not do suggestion, it's not your role. Just highlight the problem. 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
             When explaining the problem, always refer with file name and lines involved in what you are talking about.
             Next to the title I want you to use 5 emojis that fit best your feeling about that issue, you can use ANY emojis as long as it reflects your thought process. 
-            Colorgrade the title with the severity of the violation. Don't count the violation (1. 2. 3. ...) Just a short title per section.
-            
+            With emojis, colorgrade the title with the severity of the violation. Don't count the violation (1. 2. 3. ...) Just a short title per section.
+            All feedback must be ready for agentic feedback loop. We'll most likely put your description back in claude code. 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
           
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
