@@ -1,4 +1,4 @@
-<header class="bg-white border-b border-neutral-200 shadow-soft sticky top-0 z-50">
+<header class="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 shadow-soft sticky top-0 z-50">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between">
             <a href="{{ url('/') }}" class="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200">
@@ -13,36 +13,36 @@
                     </div>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-bold font-heading text-neutral-900">{{ __('app.site_title') }}</h1>
-                    <p class="text-neutral-600 text-sm hidden sm:block">{{ __('app.site_description') }}</p>
+                    <h1 class="text-xl sm:text-2xl font-bold font-heading text-neutral-900 dark:text-white">{{ __('app.site_title') }}</h1>
+                    <p class="text-neutral-600 dark:text-neutral-300 text-sm hidden sm:block">{{ __('app.site_description') }}</p>
                 </div>
             </a>
 
             <div class="flex items-center space-x-6">
                 <nav class="hidden lg:flex space-x-1">
-                    <a href="{{ url('/') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                    <a href="{{ url('/') }}" class="px-4 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 flex items-center space-x-2 font-medium">
                         <i class="fas fa-home text-sm"></i>
                         <span>{{ __('app.dashboard') }}</span>
                     </a>
-                    <a href="{{ route('contracts.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                    <a href="{{ route('contracts.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 flex items-center space-x-2 font-medium">
                         <i class="fas fa-file-contract text-sm"></i>
                         <span>{{ __('app.contracts_nav') }}</span>
                     </a>
-                    <a href="{{ route('organizations.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                    <a href="{{ route('organizations.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 flex items-center space-x-2 font-medium">
                         <i class="fas fa-building-columns text-sm"></i>
                         <span>{{ __('app.organizations') }}</span>
                     </a>
-                    <a href="{{ route('timeline.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                    <a href="{{ route('timeline.index') }}" class="px-4 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 flex items-center space-x-2 font-medium">
                         <i class="fas fa-clock text-sm"></i>
                         <span>Timeline</span>
                     </a>
                 </nav>
 
                 <!-- Dark Mode Toggle -->
-                <button 
-                    onclick="toggleDarkMode()" 
+                <button
+                    onclick="toggleDarkMode()"
                     id="dark-mode-toggle"
-                    class="px-3 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium"
+                    class="px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 flex items-center space-x-2 font-medium"
                     title="Toggle Dark Mode">
                     <i id="dark-mode-icon" class="fas fa-moon text-sm"></i>
                     <span class="hidden lg:inline" id="dark-mode-text">Dark</span>
@@ -54,16 +54,16 @@
                     $currentLang = \App\Helpers\LanguageHelper::getCurrentLanguage();
                 @endphp
                 <div class="relative">
-                    <button onclick="toggleLanguageDropdown()" class="px-3 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 flex items-center space-x-2 font-medium">
+                    <button onclick="toggleLanguageDropdown()" class="px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 flex items-center space-x-2 font-medium">
                         <i class="fas fa-globe text-sm"></i>
                         <span class="hidden md:inline">{{ $currentLang['native'] }}</span>
                         <i class="fas fa-chevron-down text-xs"></i>
                     </button>
-                    <div id="language-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-strong border border-neutral-200 opacity-0 invisible transition-all duration-300 z-50">
+                    <div id="language-dropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-800 rounded-xl shadow-strong border border-neutral-200 dark:border-neutral-600 opacity-0 invisible transition-all duration-300 z-50">
                         <div class="py-2">
                             @foreach($languages as $locale => $language)
                                 <a href="{{ route('language.switch', $locale) }}"
-                                   class="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors rounded-lg mx-2 @if(app()->getLocale() === $locale) bg-primary-50 text-primary-700 font-semibold @endif">
+                                   class="block px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-700 hover:text-primary-700 dark:hover:text-primary-400 transition-colors rounded-lg mx-2 @if(app()->getLocale() === $locale) bg-primary-50 dark:bg-neutral-700 text-primary-700 dark:text-primary-400 font-semibold @endif">
                                     {{ $language['native'] }}
                                 </a>
                             @endforeach
@@ -73,48 +73,48 @@
             </div>
 
             <!-- Mobile menu button -->
-            <button class="lg:hidden text-neutral-700 hover:text-primary-700 p-2 rounded-lg hover:bg-primary-50 transition-all duration-200" onclick="toggleMobileMenu()">
+            <button class="lg:hidden text-neutral-700 dark:text-neutral-300 hover:text-primary-700 dark:hover:text-primary-400 p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-neutral-800 transition-all duration-200" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars text-lg"></i>
             </button>
         </div>
 
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden lg:hidden mt-6 pt-6 border-t border-neutral-200">
+        <div id="mobile-menu" class="hidden lg:hidden mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
             <div class="space-y-2">
-                <a href="{{ url('/') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
+                <a href="{{ url('/') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 font-medium">
                     <i class="fas fa-home text-sm w-5"></i>
                     <span>{{ __('app.dashboard') }}</span>
                 </a>
-                <a href="{{ route('contracts.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
+                <a href="{{ route('contracts.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 font-medium">
                     <i class="fas fa-file-contract text-sm w-5"></i>
                     <span>{{ __('app.contracts') }}</span>
                 </a>
-                <a href="{{ route('organizations.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
+                <a href="{{ route('organizations.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 font-medium">
                     <i class="fas fa-building-columns text-sm w-5"></i>
                     <span>{{ __('app.organizations') }}</span>
                 </a>
-                <a href="{{ route('timeline.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-medium">
+                <a href="{{ route('timeline.index') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 font-medium">
                     <i class="fas fa-clock text-sm w-5"></i>
                     <span>Timeline</span>
                 </a>
             </div>
-            
+
             <!-- Dark Mode Toggle - Mobile -->
-            <div class="border-t border-neutral-200 pt-4 mt-4">
-                <button 
-                    onclick="toggleDarkMode()" 
-                    class="flex items-center space-x-3 px-4 py-2 rounded-lg text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 w-full">
+            <div class="border-t border-neutral-200 dark:border-neutral-700 pt-4 mt-4">
+                <button
+                    onclick="toggleDarkMode()"
+                    class="flex items-center space-x-3 px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 w-full">
                     <i id="dark-mode-icon-mobile" class="fas fa-moon text-sm w-5"></i>
                     <span id="dark-mode-text-mobile">Toggle Dark Mode</span>
                 </button>
             </div>
-            
-            <div class="border-t border-neutral-200 pt-4 mt-4">
-                <p class="text-neutral-500 text-sm mb-3 px-4 font-medium">{{ __('app.switch_language') }}:</p>
+
+            <div class="border-t border-neutral-200 dark:border-neutral-700 pt-4 mt-4">
+                <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-3 px-4 font-medium">{{ __('app.switch_language') }}:</p>
                 <div class="space-y-1">
                     @foreach($languages as $locale => $language)
                         <a href="{{ route('language.switch', $locale) }}"
-                           class="flex items-center space-x-3 px-4 py-2 rounded-lg text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 @if(app()->getLocale() === $locale) bg-primary-50 text-primary-700 font-semibold @endif">
+                           class="flex items-center space-x-3 px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-primary-50 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-400 transition-all duration-200 @if(app()->getLocale() === $locale) bg-primary-50 dark:bg-neutral-800 text-primary-700 dark:text-primary-400 font-semibold @endif">
                             <i class="fas fa-globe text-sm w-5"></i>
                             <span>{{ $language['native'] }}</span>
                         </a>
@@ -140,13 +140,13 @@ function toggleLanguageDropdown() {
 function toggleDarkMode() {
     // Get current dark mode state
     const isDarkMode = document.documentElement.classList.contains('dark');
-    
+
     // Update icons and text
     const icon = document.getElementById('dark-mode-icon');
     const text = document.getElementById('dark-mode-text');
     const iconMobile = document.getElementById('dark-mode-icon-mobile');
     const textMobile = document.getElementById('dark-mode-text-mobile');
-    
+
     if (isDarkMode) {
         // Switch to light mode
         icon.className = 'fas fa-moon text-sm';
@@ -170,15 +170,15 @@ function toggleDarkMode() {
 document.addEventListener('DOMContentLoaded', function() {
     const savedDarkMode = localStorage.getItem('darkMode');
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     // Determine initial dark mode state
     const shouldBeDark = savedDarkMode === 'true' || (savedDarkMode === null && prefersDark);
-    
+
     const icon = document.getElementById('dark-mode-icon');
     const text = document.getElementById('dark-mode-text');
     const iconMobile = document.getElementById('dark-mode-icon-mobile');
     const textMobile = document.getElementById('dark-mode-text-mobile');
-    
+
     if (shouldBeDark) {
         // Set dark mode
         document.documentElement.classList.add('dark');

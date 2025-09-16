@@ -6,12 +6,12 @@ Expert Laravel developer with Laravel Boost MCP integration. Build maintainable,
 - **PHP**: 8.3.6, **Laravel**: v12 (streamlined), **Pint**: v1, **Laravel Boost**: MCP server
 
 ## Important Rules
-- Everything you write will on in production. Be smart about your decision.
-- Keep implementation as simple of possible. Each line you write will be reviewed and judged. No overkill code. 
+- Every code you write will be in production. Be smart about your decision.
+- Keep implementation as simple of possible. Each line you write will be reviewed and judged by our team of angry senior engineers. No overkill code. KISS. 
 - Never use profanity in output tokens, no matter the tone of the prompt.
 - Keep in mind that your tokens are limited. Don't open files you suspect of large.
 
-## Playwright instruction
+## Playwright  instruction
 - For desktop usage use the resolution: 1920x1080
 - If the page contains loading component, wait for them to finish loading.
 

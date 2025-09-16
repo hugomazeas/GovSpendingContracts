@@ -26,32 +26,24 @@ class TimelineRepository implements TimelineRepositoryInterface
         int $startYear, 
         int $contractsPerOrg
     ): Collection {
-        $allContracts = collect();
-        
-        foreach ($organizations as $organization) {
-            $orgContracts = Contract::query()
-                ->select([
-                    'id',
-                    'organization',
-                    'contract_date',
-                    'contract_period_start_date',
-                    'contract_period_end_date',
-                    'total_contract_value',
-                    'description_of_work_english',
-                    'vendor_name'
-                ])
-                ->where('organization', $organization)
-                ->where('contract_year', '>=', $startYear)
-                ->whereNotNull('contract_date')
-                ->where('total_contract_value', '>', $minimumContractValue)
-                ->where('contract_period_start_date', '>=', config('timeline.minimum_contract_date'))
-                ->orderBy('total_contract_value', 'desc')
-                ->limit($contractsPerOrg)
-                ->get();
-            
-            $allContracts = $allContracts->merge($orgContracts);
-        }
-        
-        return $allContracts;
+        return Contract::query()
+            ->select([
+                'id',
+                'organization', 
+                'contract_date',
+                'contract_period_start_date',
+                'contract_period_end_date',
+                'total_contract_value',
+                'description_of_work_english',
+                'vendor_name'
+            ])
+            ->whereIn('organization', $organizations)
+            ->where('contract_year', '>=', $startYear)
+            ->whereNotNull('contract_date')
+            ->where('total_contract_value', '>', $minimumContractValue)
+            ->where('contract_period_start_date', '>=', config('timeline.minimum_contract_date'))
+            ->orderBy('total_contract_value', 'desc')
+            ->limit($contractsPerOrg * count($organizations))
+            ->get();
     }
 }

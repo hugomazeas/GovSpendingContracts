@@ -1,13 +1,13 @@
 @props(['countries'])
 
 <div class="card">
-    <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+    <div class="flex items-center mb-6 pb-4 border-b border-gray-200 dark:border-neutral-600">
         <i class="fas fa-globe text-2xl text-accent-600 mr-3"></i>
-        <h3 class="text-xl font-semibold text-gray-800">Top 5 Most Profitable Vendor Countries</h3>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Top 5 Most Profitable Vendor Countries</h3>
     </div>
     
     @if($countries->isEmpty())
-        <div class="text-center py-8 text-gray-500">
+        <div class="text-center py-8 text-gray-500 dark:text-neutral-400">
             <i class="fas fa-globe text-4xl text-gray-300 mb-4"></i>
             <p class="text-lg">{{ __('app.no_rank_data') }}</p>
         </div>
@@ -19,10 +19,10 @@
                         {{ $index + 1 }}
                     </div>
                     <div class="flex-1">
-                        <div class="font-semibold text-gray-800 vendor-name group-hover:text-accent-600 transition-colors">
+                        <div class="font-semibold text-gray-800 dark:text-white vendor-name group-hover:text-accent-600 transition-colors">
                             {{ $country->country_of_vendor }}
                         </div>
-                        <div class="text-sm text-gray-600">
+                        <div class="text-sm text-gray-600 dark:text-neutral-300">
                             {{ number_format($country->contract_count) }} contracts
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                             ${{ number_format($country->total_value) }}
                         @endif
                     </div>
-                    <div class="text-xs text-gray-500">{{ __('app.total_value_label') }}</div>
+                    <div class="text-xs text-gray-500 dark:text-neutral-400">{{ __('app.total_value_label') }}</div>
                 </div>
             </div>
         @endforeach

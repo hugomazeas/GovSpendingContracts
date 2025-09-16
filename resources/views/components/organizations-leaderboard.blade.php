@@ -1,9 +1,9 @@
 @props(['organizations'])
 
 <div class="card">
-    <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+    <div class="flex items-center mb-6 pb-4 border-b border-gray-200 dark:border-neutral-600">
         <i class="fas fa-building-columns text-2xl text-blue-500 mr-3"></i>
-        <h3 class="text-xl font-semibold text-gray-800">Top Government Organizations by Spending</h3>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Top Government Organizations by Spending</h3>
     </div>
     
     @foreach($organizations->take(5) as $index => $org)
@@ -14,10 +14,10 @@
                         {{ $index + 1 }}
                     </div>
                     <div class="flex-1">
-                        <div class="font-semibold text-gray-800 vendor-name group-hover:text-primary-600 transition-colors">
+                        <div class="font-semibold text-gray-800 dark:text-white vendor-name group-hover:text-primary-600 transition-colors">
                             {{ $org->organization }}
                         </div>
-                        <div class="text-sm text-gray-600">
+                        <div class="text-sm text-gray-600 dark:text-neutral-300">
                             {{ number_format($org->contract_count) }} contracts
                         </div>
                     </div>
@@ -32,7 +32,7 @@
                                 ${{ number_format($org->total_spending / 1000000, 1) }}M
                             @endif
                         </div>
-                        <div class="text-xs text-gray-500">{{ __('app.total_spent_label') }}</div>
+                        <div class="text-xs text-gray-500 dark:text-neutral-400">{{ __('app.total_spent_label') }}</div>
                     </div>
                     <i class="fas fa-arrow-right text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity ml-2"></i>
                 </div>
